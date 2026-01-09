@@ -87,7 +87,11 @@ function selectMedia(media: TreeItem) {
       class="flex-1"
     >
       <template #trailing>
-        <UPopover v-model:open="popoverOpen">
+        <UPopover
+          v-model:open="popoverOpen"
+          :portal="false"
+          :ui="{ content: 'z-[1000]' }"
+        >
           <UButton
             size="xs"
             color="neutral"

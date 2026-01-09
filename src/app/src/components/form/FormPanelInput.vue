@@ -11,6 +11,9 @@ import InputIcon from './input/InputIcon.vue'
 import InputMedia from './input/InputMedia.vue'
 import InputNumber from './input/InputNumber.vue'
 import InputText from './input/InputText.vue'
+import InputColor from './input/InputColor.vue'
+import { isColorLikeField } from '../../utils/formColorHeuristics'
+import { isImageLikeField } from '../../utils/formMediaHeuristics'
 
 const props = defineProps({
   formItem: {
@@ -34,16 +37,6 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   string: InputText,
 }
 
-// Check if a field name looks like an image field
-function isImageLikeField(formItem: FormItem): boolean {
-  const combined = [formItem.title, formItem.id, (formItem as { name?: string }).name, (formItem as { path?: string }).path]
-    .filter(Boolean)
-    .map(s => s!.toLowerCase())
-    .join('|')
-
-  const imageTerms = ['image', 'img', 'photo', 'background', 'backgroundimage', 'poster', 'thumb', 'thumbnail', 'logo', 'banner', 'cover', 'avatar', 'picture']
-  return imageTerms.some(term => combined.includes(term))
-}
 
 const inputComponentName = computed(() => {
   const type = props.formItem.type
@@ -54,7 +47,11 @@ const inputComponentName = computed(() => {
   }
 
   // Check if this looks like an image field
-  if (isImageLikeField(props.formItem)) {
+  if (isColorLikeField({ key: props.formItem.key, title: props.formItem.title, id: props.formItem.id })) {
+    return InputColor
+  }
+
+  if (isImageLikeField({ key: props.formItem.key, title: props.formItem.title, id: props.formItem.id })) {
     return InputMedia
   }
 

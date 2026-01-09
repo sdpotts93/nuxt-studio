@@ -149,6 +149,18 @@ export const buildFormTreeFromProps = (node: ProseMirrorNode, componentMeta: Com
   // Add custom props added manually by user
   for (const key in nodeProps) {
     // Skip props already added from meta
+    const normalizedKey = key.startsWith(':') ? key.slice(1) : key
+
+    if (formTree[normalizedKey]) {
+      formTree[normalizedKey].value = nodeProps[key]
+      continue
+    }
+
+    if (formTree[`:${normalizedKey}`]) {
+      formTree[`:${normalizedKey}`].value = nodeProps[key]
+      continue
+    }
+
     if (formTree[key] || formTree[`:${key}`]) {
       continue
     }
@@ -173,15 +185,16 @@ export const buildFormTreeFromProps = (node: ProseMirrorNode, componentMeta: Com
       }
     }
 
-    const formattedKey = typeof value !== 'string' ? `:${key}` : key
+    const valueType = Array.isArray(value) ? 'array' : typeof value
+    const formattedKey = valueType !== 'string' ? `:${normalizedKey}` : normalizedKey
     formTree[formattedKey] = {
       id: `${componentId}/${formattedKey}`,
       key: formattedKey,
-      title: upperFirst(key),
+      title: upperFirst(normalizedKey),
       value,
       custom,
       disabled,
-      type: typeof value as never,
+      type: valueType as never,
     }
   }
 

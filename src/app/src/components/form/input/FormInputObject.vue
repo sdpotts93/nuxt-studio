@@ -9,6 +9,9 @@ import InputBoolean from './InputBoolean.vue'
 import InputDate from './InputDate.vue'
 import InputIcon from './InputIcon.vue'
 import InputMedia from './InputMedia.vue'
+import InputColor from './InputColor.vue'
+import { isImageLikeField } from '../../../utils/formMediaHeuristics'
+import { isColorLikeField } from '../../../utils/formColorHeuristics'
 import FormInputArray from './FormInputArray.vue'
 
 const props = defineProps({
@@ -36,23 +39,16 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   object: undefined, // Will use FormInputObject recursively
 }
 
-// Check if a field name looks like an image field
-function isImageLikeField(key: string): boolean {
-  const lower = key.toLowerCase()
-  const exactMatches = ['image', 'img', 'src', 'poster', 'thumbnail', 'avatar', 'logo', 'banner', 'cover', 'photo', 'picture', 'background', 'backgroundimage', 'ogimage', 'heroimage', 'coverimage']
-  const endsWith = ['image', 'img', 'photo', 'picture', 'thumbnail', 'poster', 'avatar', 'banner', 'logo', 'cover']
-
-  if (exactMatches.includes(lower)) return true
-  for (const suffix of endsWith) {
-    if (lower.length > suffix.length && lower.endsWith(suffix)) return true
-  }
-  return false
-}
 
 // Get the appropriate component for a field
 function getComponentForField(type: FormInputsTypes | undefined, key: string): Component {
+  // If it's a string type but looks like a color field, use color picker
+  if ((type === 'string' || !type) && isColorLikeField({ key })) {
+    return InputColor
+  }
+
   // If it's a string type but looks like an image field, use media picker
-  if ((type === 'string' || !type) && isImageLikeField(key)) {
+  if ((type === 'string' || !type) && isImageLikeField({ key })) {
     return InputMedia
   }
   return typeComponentMap[type || 'string'] ?? InputText
