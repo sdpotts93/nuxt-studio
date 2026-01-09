@@ -90,7 +90,6 @@ function selectMedia(media: TreeItem) {
         <UPopover
           v-model:open="popoverOpen"
           :portal="false"
-          :ui="{ content: 'z-[1000]' }"
         >
           <UButton
             size="xs"
