@@ -6,6 +6,15 @@ export const MEDIA_IGNORE_KEYWORDS = [
   'title',
   'text',
   'link',
+  'boton',
+  'titulo',
+  'texto',
+  'enlace',
+  'ruta',
+  'tamano',
+  'ancho',
+  'alto',
+  'fondo',
 ]
 
 export const IMAGE_KEYWORDS = [
@@ -22,6 +31,12 @@ export const IMAGE_KEYWORDS = [
   'cover',
   'avatar',
   'picture',
+  'imagen',
+  'foto',
+  'fondo',
+  'portada',
+  'miniatura',
+  'mini',
 ]
 
 function getLeafKey(key?: string, id?: string): string {

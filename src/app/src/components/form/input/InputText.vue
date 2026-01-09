@@ -34,12 +34,40 @@ const selectItems = computed(() => {
 })
 
 // Keywords that suggest the field expects a media path
-const imageKeywords = ['image', 'img', 'src', 'cover', 'thumbnail', 'avatar', 'photo', 'picture', 'banner', 'logo', 'poster']
+const imageKeywords = [
+  'image',
+  'img',
+  'src',
+  'cover',
+  'thumbnail',
+  'avatar',
+  'photo',
+  'picture',
+  'banner',
+  'logo',
+  'poster',
+  'imagen',
+  'foto',
+  'fondo',
+  'portada',
+  'miniatura',
+  'mini',
+]
 const videoKeywords = ['video']
-const videoPosterKeywords = ['poster', 'thumbnail', 'preview', 'cover', 'image', 'img']
+const videoPosterKeywords = [
+  'poster',
+  'thumbnail',
+  'preview',
+  'cover',
+  'image',
+  'img',
+  'imagen',
+  'miniatura',
+  'portada',
+]
 // Keywords that suggest the field expects an icon
-const iconKeywords = ['icon']
-const iconIgnoreKeywords = ['size', 'width', 'height', 'color', 'background', 'bg']
+const iconKeywords = ['icon', 'icono']
+const iconIgnoreKeywords = ['size', 'width', 'height', 'color', 'background', 'bg', 'tamano', 'ancho', 'alto', 'fondo']
 
 const mediaType = computed(() => {
   if (props.formItem?.type === 'video') return 'video'
@@ -83,7 +111,7 @@ const linkTypeItems = [
   { label: 'External', value: 'external' },
 ]
 
-const linkKeywords = ['link', 'url', 'href']
+const linkKeywords = ['link', 'url', 'href', 'enlace', 'liga', 'vinculo', 'ruta']
 const isLinkProp = computed(() => {
   if (props.formItem?.type === 'link') return true
   const id = props.formItem?.id?.toLowerCase() || ''
