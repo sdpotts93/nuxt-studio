@@ -3,19 +3,28 @@ export declare const serviceWorker: () => string;
 export { }
 
 
-declare module '@tiptap/vue-3' {
+declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        imagePicker: {
-            insertImagePicker: () => ReturnType;
+        Element: {
+            setElement: (tag: string, slot?: string) => ReturnType;
         };
     }
 }
 
 
-declare module '@tiptap/core' {
+declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
-        Element: {
-            setElement: (tag: string, slot?: string) => ReturnType;
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        imagePicker: {
+            insertImagePicker: () => ReturnType;
         };
     }
 }
@@ -28,15 +37,6 @@ declare module '@tiptap/core' {
              * Add video element
              */
             addVideo: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
         };
     }
 }
@@ -68,26 +68,6 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        SpanStyle: {
-            /**
-             * Wrap selection (or insert empty) with span-style node
-             */
-            setSpanStyle: (attributes?: SpanStyleAttrs) => ReturnType;
-            /**
-             * Update attributes on current span-style node
-             */
-            updateSpanStyle: (attributes?: SpanStyleAttrs) => ReturnType;
-            /**
-             * Remove the current span-style node (unwrap content)
-             */
-            unsetSpanStyle: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
         Binding: {
             /**
              * Insert a binding node
@@ -101,6 +81,26 @@ declare module '@tiptap/core' {
              * Remove current binding node
              */
             unsetBinding: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        SpanStyle: {
+            /**
+             * Wrap selection (or insert empty) with span-style node
+             */
+            setSpanStyle: (attributes?: SpanStyleAttrs) => ReturnType;
+            /**
+             * Update attributes on current span-style node
+             */
+            updateSpanStyle: (attributes?: SpanStyleAttrs) => ReturnType;
+            /**
+             * Remove the current span-style node (unwrap content)
+             */
+            unsetSpanStyle: () => ReturnType;
         };
     }
 }
