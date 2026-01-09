@@ -439,19 +439,10 @@ export declare enum VideoFileExtension {
 export { }
 
 
-declare module '@tiptap/vue-3' {
+declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        imagePicker: {
-            insertImagePicker: () => ReturnType;
+        Element: {
+            setElement: (tag: string, slot?: string) => ReturnType;
         };
     }
 }
@@ -459,8 +450,20 @@ declare module '@tiptap/vue-3' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        Element: {
-            setElement: (tag: string, slot?: string) => ReturnType;
+        Video: {
+            /**
+             * Add video element
+             */
+            addVideo: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
         };
     }
 }
@@ -478,13 +481,10 @@ declare module '@tiptap/core' {
 }
 
 
-declare module '@tiptap/core' {
+declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
-        Video: {
-            /**
-             * Add video element
-             */
-            addVideo: () => ReturnType;
+        imagePicker: {
+            insertImagePicker: () => ReturnType;
         };
     }
 }
