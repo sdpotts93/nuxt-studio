@@ -104,9 +104,6 @@ importers:
       modern-monaco:
         specifier: ^0.3.6
         version: 0.3.6(typescript@5.9.3)
-      nuxt-studio:
-        specifier: workspace:*
-        version: 'link:'
       ofetch:
         specifier: ^1.5.1
         version: 1.5.1
