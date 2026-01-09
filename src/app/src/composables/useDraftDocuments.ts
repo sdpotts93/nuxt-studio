@@ -63,11 +63,14 @@ export const useDraftDocuments = createSharedComposable((host: StudioHost, gitPr
 
       const existingDraftToRename = list.value.find(draftItem => draftItem.fsPath === fsPath) as DraftItem<DatabaseItem>
       const dbItemToRename = await hostDb.get(fsPath)
-      if (!dbItemToRename) {
+
+      // For newly created files, the database might not have the item yet
+      // Fall back to using the draft's modified item
+      if (!dbItemToRename && !existingDraftToRename?.modified) {
         throw new Error(`Database item not found for document fsPath: ${fsPath}`)
       }
 
-      const modifiedDbItem = existingDraftToRename?.modified || dbItemToRename
+      const modifiedDbItem = (existingDraftToRename?.modified || dbItemToRename) as DatabaseItem
       let originalDbItem: DatabaseItem | undefined = dbItemToRename
       if (existingDraftToRename) {
         originalDbItem = existingDraftToRename.original
