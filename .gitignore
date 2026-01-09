@@ -14,7 +14,7 @@ node_modules
 **/.yarn/*state*
 
 # Generated dirs
-dist
+# dist is committed for GitHub install support
 
 # Nuxt
 .nuxt
