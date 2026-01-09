@@ -33,7 +33,13 @@ function getLeafKey(key?: string, id?: string): string {
   return ''
 }
 
-export function shouldIgnoreMediaField(options: { key?: string; title?: string; id?: string }): boolean {
+type MediaFieldOptions = {
+  key?: string,
+  title?: string,
+  id?: string,
+}
+
+export function shouldIgnoreMediaField(options: MediaFieldOptions): boolean {
   const leaf = getLeafKey(options.key, options.id).toLowerCase()
   const title = (options.title || '').toLowerCase()
 
@@ -43,7 +49,7 @@ export function shouldIgnoreMediaField(options: { key?: string; title?: string; 
   ))
 }
 
-export function isImageLikeField(options: { key?: string; title?: string; id?: string }): boolean {
+export function isImageLikeField(options: MediaFieldOptions): boolean {
   if (shouldIgnoreMediaField(options)) return false
 
   const leaf = getLeafKey(options.key, options.id).toLowerCase()

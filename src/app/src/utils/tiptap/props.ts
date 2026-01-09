@@ -152,12 +152,26 @@ export const buildFormTreeFromProps = (node: ProseMirrorNode, componentMeta: Com
     const normalizedKey = key.startsWith(':') ? key.slice(1) : key
 
     if (formTree[normalizedKey]) {
-      formTree[normalizedKey].value = nodeProps[key]
+      const parsedValue = parseJsonValue(nodeProps[key])
+      formTree[normalizedKey].value = parsedValue
+      if (formTree[normalizedKey].type === 'array' && !formTree[normalizedKey].arrayItemForm) {
+        formTree[normalizedKey].arrayItemForm = buildArrayItemFormFromValue(parsedValue)
+      }
+      else if (formTree[normalizedKey].type === 'object' && !formTree[normalizedKey].children) {
+        formTree[normalizedKey].children = buildObjectChildrenFromValue(parsedValue, formTree[normalizedKey].id)
+      }
       continue
     }
 
     if (formTree[`:${normalizedKey}`]) {
-      formTree[`:${normalizedKey}`].value = nodeProps[key]
+      const parsedValue = parseJsonValue(nodeProps[key])
+      formTree[`:${normalizedKey}`].value = parsedValue
+      if (formTree[`:${normalizedKey}`].type === 'array' && !formTree[`:${normalizedKey}`].arrayItemForm) {
+        formTree[`:${normalizedKey}`].arrayItemForm = buildArrayItemFormFromValue(parsedValue)
+      }
+      else if (formTree[`:${normalizedKey}`].type === 'object' && !formTree[`:${normalizedKey}`].children) {
+        formTree[`:${normalizedKey}`].children = buildObjectChildrenFromValue(parsedValue, formTree[`:${normalizedKey}`].id)
+      }
       continue
     }
 
@@ -168,6 +182,7 @@ export const buildFormTreeFromProps = (node: ProseMirrorNode, componentMeta: Com
     let disabled = false
     let custom = true
     let value = nodeProps[key]
+    value = parseJsonValue(value)
     // Skip link href for links since this attribute is updated through the `Update link`
     if (node?.type?.name === 'link-element') {
       if (['rel', 'target'].includes(key)) {
@@ -187,7 +202,7 @@ export const buildFormTreeFromProps = (node: ProseMirrorNode, componentMeta: Com
 
     const valueType = Array.isArray(value) ? 'array' : typeof value
     const formattedKey = valueType !== 'string' ? `:${normalizedKey}` : normalizedKey
-    formTree[formattedKey] = {
+    const customItem: FormItem = {
       id: `${componentId}/${formattedKey}`,
       key: formattedKey,
       title: upperFirst(normalizedKey),
@@ -196,6 +211,15 @@ export const buildFormTreeFromProps = (node: ProseMirrorNode, componentMeta: Com
       disabled,
       type: valueType as never,
     }
+
+    if (valueType === 'array') {
+      customItem.arrayItemForm = buildArrayItemFormFromValue(value)
+    }
+    else if (valueType === 'object' && value && !Array.isArray(value)) {
+      customItem.children = buildObjectChildrenFromValue(value, customItem.id)
+    }
+
+    formTree[formattedKey] = customItem
   }
 
   // Add hidden state for some props
@@ -229,18 +253,24 @@ const buildPropItem = (componentId: string, prop: PropertyMeta, nodeProps: Recor
   const title = upperFirst(prop.name)
   const defaultValue: string | boolean | number | object | unknown[] | null = prop.tags?.find(tag => tag.name === 'defaultValue')?.text || ''
 
-  const { type, options } = computeTypeAndOptions(componentId, key, prop, level)
+  let { type, options } = computeTypeAndOptions(componentId, key, prop, level)
+
+  // Get node value: from parent object, direct prop, or interpreted prop (`:key`)
+  const rawNodeValue = (parent?.type === 'object' && parent?.value)
+    ? (parent.value as Record<string, unknown>)[key]
+    : nodeProps[key] ?? nodeProps[`:${key}`]
+  const nodeValue = parseJsonValue(rawNodeValue)
+  const inferredType = inferComplexType(nodeValue)
+  if (inferredType && inferredType !== type) {
+    type = inferredType
+    options = []
+  }
 
   // Format key based on type
   const formattedKey = ['string', 'icon'].includes(type) ? key : `:${key}`
   const id = parent?.id
     ? `${parent?.id}/${formattedKey}`
     : `${componentId}/${formattedKey}`
-
-  // Get node value: from parent object, direct prop, or interpreted prop (`:key`)
-  const nodeValue = (parent?.type === 'object' && parent?.value)
-    ? (parent.value as Record<string, unknown>)[key]
-    : nodeProps[key] ?? nodeProps[`:${key}`]
 
   // Resolve default value
   const resolvedDefault = defaultValue !== undefined && defaultValue !== null
@@ -310,6 +340,9 @@ const buildPropItem = (componentId: string, prop: PropertyMeta, nodeProps: Recor
       }
     }
   }
+  if (type === 'array' && !propItem.arrayItemForm) {
+    propItem.arrayItemForm = buildArrayItemFormFromValue(value)
+  }
 
   // Handle object children
   if (type === 'object' && typeof prop.schema === 'object' && prop.schema.schema) {
@@ -332,11 +365,101 @@ const buildPropItem = (componentId: string, prop: PropertyMeta, nodeProps: Recor
       }, {} as Record<string, FormItem>)
     }
   }
+  if (type === 'object' && !propItem.children && value && typeof value === 'object' && !Array.isArray(value)) {
+    propItem.children = buildObjectChildrenFromValue(value, propItem.id)
+  }
   if (options.length) {
     propItem.options = options
   }
 
   return propItem
+}
+
+function parseJsonValue(value: unknown): unknown {
+  if (typeof value !== 'string') return value
+  const trimmed = value.trim()
+  if (!trimmed) return value
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) return value
+  try {
+    const parsed = JSON.parse(trimmed)
+    if (parsed && (Array.isArray(parsed) || typeof parsed === 'object')) {
+      return parsed
+    }
+  }
+  catch {
+    return value
+  }
+  return value
+}
+
+function inferComplexType(value: unknown): JSType | null {
+  if (Array.isArray(value)) return 'array'
+  if (value && typeof value === 'object') return 'object'
+  return null
+}
+
+function inferValueType(value: unknown): JSType {
+  if (Array.isArray(value)) return 'array'
+  if (value && typeof value === 'object') return 'object'
+  if (typeof value === 'number') return 'number'
+  if (typeof value === 'boolean') return 'boolean'
+  return 'string'
+}
+
+function buildArrayItemFormFromValue(value: unknown): FormItem {
+  if (!Array.isArray(value)) {
+    return {
+      id: '#array/items',
+      type: 'string',
+      title: 'Items',
+    }
+  }
+
+  const sample = value.find(item => item !== undefined && item !== null)
+  if (sample && typeof sample === 'object' && !Array.isArray(sample)) {
+    return {
+      id: '#array/items',
+      type: 'object',
+      title: 'Items',
+      children: buildObjectChildrenFromValue(sample, '#array/items'),
+    }
+  }
+
+  return {
+    id: '#array/items',
+    type: 'string',
+    title: 'Items',
+  }
+}
+
+function buildObjectChildrenFromValue(value: unknown, parentId: string): FormTree {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {}
+  }
+
+  return Object.entries(value as Record<string, unknown>).reduce((acc, [childKey, childValue]) => {
+    const childType = inferValueType(childValue)
+    const childId = `${parentId}/${childKey}`
+    const childItem: FormItem = {
+      id: childId,
+      key: childKey,
+      title: upperFirst(childKey),
+      value: childValue,
+      type: childType as never,
+      custom: true,
+      default: generateDefault(childType, 1),
+    }
+
+    if (childType === 'array') {
+      childItem.arrayItemForm = buildArrayItemFormFromValue(childValue)
+    }
+    else if (childType === 'object') {
+      childItem.children = buildObjectChildrenFromValue(childValue, childId)
+    }
+
+    acc[childKey] = childItem
+    return acc
+  }, {} as FormTree)
 }
 
 // Convert string like `"\"horizontal\" | \"vertical\" | undefined"` to array

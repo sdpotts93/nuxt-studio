@@ -39,10 +39,12 @@ const videoKeywords = ['video']
 const videoPosterKeywords = ['poster', 'thumbnail', 'preview', 'cover', 'image', 'img']
 // Keywords that suggest the field expects an icon
 const iconKeywords = ['icon']
+const iconIgnoreKeywords = ['size', 'width', 'height', 'color', 'background', 'bg']
 
 const mediaType = computed(() => {
   if (props.formItem?.type === 'video') return 'video'
   if (props.formItem?.type === 'media') return 'image'
+  if (props.formItem?.type === 'color' || props.formItem?.type === 'link') return null
 
   const id = props.formItem?.id?.split('/').pop()?.toLowerCase() || ''
   const key = props.formItem?.key?.toLowerCase() || ''
@@ -69,6 +71,7 @@ const mediaIcon = computed(() => {
 })
 
 const useColorInput = computed(() => {
+  if (props.formItem?.type === 'color') return true
   return isColorLikeField({ key: props.formItem?.key, title: props.formItem?.title, id: props.formItem?.id })
 })
 
@@ -82,6 +85,7 @@ const linkTypeItems = [
 
 const linkKeywords = ['link', 'url', 'href']
 const isLinkProp = computed(() => {
+  if (props.formItem?.type === 'link') return true
   const id = props.formItem?.id?.toLowerCase() || ''
   const key = props.formItem?.key?.toLowerCase() || ''
   const title = props.formItem?.title?.toLowerCase() || ''
@@ -200,10 +204,11 @@ const isIconProp = computed(() => {
   const id = props.formItem?.id?.toLowerCase() || ''
   const key = props.formItem?.key?.toLowerCase() || ''
   const title = props.formItem?.title?.toLowerCase() || ''
+  const combined = `${id} ${key} ${title}`
+  const hasIcon = iconKeywords.some(keyword => combined.includes(keyword))
+  const hasIgnore = iconIgnoreKeywords.some(keyword => combined.includes(keyword))
 
-  return iconKeywords.some(keyword =>
-    id.includes(keyword) || key.includes(keyword) || title.includes(keyword),
-  )
+  return hasIcon && !hasIgnore
 })
 
 function handleMediaSelect(media: TreeItem) {

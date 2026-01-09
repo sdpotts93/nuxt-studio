@@ -33,6 +33,8 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   datetime: InputDate,
   icon: InputIcon,
   media: InputMedia,
+  color: InputColor,
+  link: InputText,
   number: InputNumber,
   string: InputText,
 }
@@ -44,6 +46,14 @@ const inputComponentName = computed(() => {
   // Don't override array or object types
   if (type === 'array' || type === 'object') {
     return typeComponentMap[type] ?? InputText
+  }
+
+  if (type === 'color') {
+    return InputColor
+  }
+
+  if (type === 'link') {
+    return InputText
   }
 
   // Check if this looks like an image field
@@ -89,6 +99,8 @@ function computeValue(formItem: FormItem): unknown {
     case 'icon':
     case 'media':
     case 'file':
+    case 'color':
+    case 'link':
       return typeof value === 'string' ? value : ''
     case 'boolean':
       return typeof value === 'boolean' ? value : false

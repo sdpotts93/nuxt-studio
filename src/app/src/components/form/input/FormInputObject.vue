@@ -33,6 +33,8 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   datetime: InputDate,
   icon: InputIcon,
   media: InputMedia,
+  color: InputColor,
+  link: InputText,
   number: InputNumber,
   string: InputText,
   array: FormInputArray,
@@ -42,6 +44,14 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
 
 // Get the appropriate component for a field
 function getComponentForField(type: FormInputsTypes | undefined, key: string): Component {
+  if (type === 'color') {
+    return InputColor
+  }
+
+  if (type === 'link') {
+    return InputText
+  }
+
   // If it's a string type but looks like a color field, use color picker
   if ((type === 'string' || !type) && isColorLikeField({ key })) {
     return InputColor
