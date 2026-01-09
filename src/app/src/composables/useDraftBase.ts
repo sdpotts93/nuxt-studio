@@ -141,6 +141,14 @@ export function useDraftBase<T extends DatabaseItem | MediaItem>(
         }
       }
       else {
+        // Guard against undefined original (shouldn't happen but can if state is corrupted)
+        if (!existingItem.original) {
+          // Treat as created file - just delete it
+          await hostDb.delete(draftItem.fsPath)
+          await storage.removeItem(draftItem.fsPath)
+          list.value = list.value.filter(item => item.fsPath !== draftItem.fsPath)
+          continue
+        }
         // @ts-expect-error upsert type is wrong, second param should be DatabaseItem | MediaItem
         await hostDb.upsert(draftItem.fsPath, existingItem.original)
         existingItem.modified = existingItem.original
