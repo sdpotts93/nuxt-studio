@@ -88,7 +88,6 @@ function selectIcon(icon: string) {
           v-model:open="popoverOpen"
           :portal="false"
           :content="{ side: 'left' }"
-          :ui="{ content: 'z-[1000]' }"
         >
           <UButton
             size="xs"

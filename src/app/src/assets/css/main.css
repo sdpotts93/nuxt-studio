@@ -18,6 +18,11 @@
   --ui-primary: white;
 }
 
+[data-slot="overlay"],
+[data-slot="content"] {
+  z-index: 10 !important;
+}
+
 @theme static {
   --color-green-50: '#EFFDF5';
   --color-green-100: '#D9FBE8';
