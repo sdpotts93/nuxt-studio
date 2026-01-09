@@ -3,6 +3,7 @@ import type { TreeItem } from '../../types'
 import type { PropType } from 'vue'
 import { computed } from 'vue'
 import { getFileIcon } from '../../utils/file'
+import { findParentFromFsPath } from '../../utils/tree'
 import { useStudio } from '../../composables/useStudio'
 import { StudioItemActionId } from '../../types'
 import ContentCardForm from './ContentCardForm.vue'
@@ -21,13 +22,19 @@ const props = defineProps({
 })
 
 const itemExtensionIcon = computed(() => getFileIcon(props.item.fsPath))
+
+// Get the parent folder of the item being renamed (not currentItem which might be the file itself)
+const parentItem = computed(() => {
+  const parent = findParentFromFsPath(context.activeTree.value.root.value, props.item.fsPath)
+  return parent || context.activeTree.value.rootItem.value
+})
 </script>
 
 <template>
   <ContentCardForm
     v-if="showRenameForm"
     :renamed-item="props.item"
-    :parent-item="context.activeTree.value.currentItem.value"
+    :parent-item="parentItem"
     :action-id="StudioItemActionId.RenameItem"
   />
   <ItemCard

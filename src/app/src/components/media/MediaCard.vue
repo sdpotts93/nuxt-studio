@@ -4,6 +4,7 @@ import type { PropType } from 'vue'
 import { computed } from 'vue'
 import { Image } from '@unpic/vue'
 import { isImageFile } from '../../utils/file'
+import { findParentFromFsPath } from '../../utils/tree'
 import { useStudio } from '../../composables/useStudio'
 import { StudioItemActionId } from '../../types'
 import MediaCardForm from './MediaCardForm.vue'
@@ -22,13 +23,19 @@ const props = defineProps({
 })
 
 const imageSrc = computed(() => isImageFile(props.item.fsPath) ? props.item.routePath : null)
+
+// Get the parent folder of the item being renamed (not currentItem which might be the file itself)
+const parentItem = computed(() => {
+  const parent = findParentFromFsPath(context.activeTree.value.root.value, props.item.fsPath)
+  return parent || context.activeTree.value.rootItem.value
+})
 </script>
 
 <template>
   <MediaCardForm
     v-if="showRenameForm"
     :renamed-item="props.item"
-    :parent-item="context.activeTree.value.currentItem.value"
+    :parent-item="parentItem"
     :action-id="StudioItemActionId.RenameItem"
   />
   <ItemCard
