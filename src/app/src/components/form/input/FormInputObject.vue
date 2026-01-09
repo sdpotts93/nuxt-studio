@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { titleCase } from 'scule'
-import type { FormTree } from '../../../types'
-import type { PropType } from 'vue'
+import type { FormTree, FormInputsTypes } from '../../../types'
+import type { Component, PropType } from 'vue'
 import { computed } from 'vue'
+import InputText from './InputText.vue'
+import InputNumber from './InputNumber.vue'
+import InputBoolean from './InputBoolean.vue'
+import InputDate from './InputDate.vue'
+import InputIcon from './InputIcon.vue'
+import InputMedia from './InputMedia.vue'
+import FormInputArray from './FormInputArray.vue'
 
 const props = defineProps({
   children: {
@@ -16,24 +23,74 @@ const model = defineModel({
   default: (): Record<string, unknown> => ({}),
 })
 
+// Map of type to component
+const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
+  boolean: InputBoolean,
+  date: InputDate,
+  datetime: InputDate,
+  icon: InputIcon,
+  media: InputMedia,
+  number: InputNumber,
+  string: InputText,
+  array: FormInputArray,
+  object: undefined, // Will use FormInputObject recursively
+}
+
+// Check if a field name looks like an image field
+function isImageLikeField(key: string): boolean {
+  const lower = key.toLowerCase()
+  const exactMatches = ['image', 'img', 'src', 'poster', 'thumbnail', 'avatar', 'logo', 'banner', 'cover', 'photo', 'picture', 'background', 'backgroundimage', 'ogimage', 'heroimage', 'coverimage']
+  const endsWith = ['image', 'img', 'photo', 'picture', 'thumbnail', 'poster', 'avatar', 'banner', 'logo', 'cover']
+
+  if (exactMatches.includes(lower)) return true
+  for (const suffix of endsWith) {
+    if (lower.length > suffix.length && lower.endsWith(suffix)) return true
+  }
+  return false
+}
+
+// Get the appropriate component for a field
+function getComponentForField(type: FormInputsTypes | undefined, key: string): Component {
+  // If it's a string type but looks like an image field, use media picker
+  if ((type === 'string' || !type) && isImageLikeField(key)) {
+    return InputMedia
+  }
+  return typeComponentMap[type || 'string'] ?? InputText
+}
+
+// Get the default value for a type
+function getDefaultValue(type: FormInputsTypes | undefined): unknown {
+  switch (type) {
+    case 'boolean': return false
+    case 'number': return 0
+    case 'array': return []
+    case 'object': return {}
+    default: return ''
+  }
+}
+
 const entries = computed(() => {
   if (!props.children) return []
 
-  return Object.entries(props.children).map(([key, child]) => ({
-    key,
-    label: titleCase(child.title || key),
-    value: model.value?.[key] ?? child.default ?? '',
-    formItem: child,
-  }))
+  return Object.entries(props.children).map(([key, child]) => {
+    const formItem = child as FormTree[string]
+    return {
+      key,
+      label: titleCase(formItem.title || key),
+      value: model.value?.[key] ?? formItem.default ?? getDefaultValue(formItem.type),
+      type: formItem.type || 'string',
+      formItem,
+    }
+  })
 })
 
-function updateValue(key: string, value: string | number) {
+function updateValue(key: string, value: unknown) {
   model.value = { ...model.value, [key]: value }
 }
 </script>
 
 <template>
-  <div class="space-y-2">
+  <div class="space-y-2 mt-1 ml-2 pl-3 border-l border-gray-200 dark:border-gray-700/50">
     <template v-if="entries.length">
       <UFormField
         v-for="entry in entries"
@@ -44,9 +101,29 @@ function updateValue(key: string, value: string | number) {
           label: 'text-xs font-medium tracking-tight',
         }"
       >
-        <InputText
-          :model-value="String(entry.value || '')"
+        <!-- Nested object -->
+        <FormInputObject
+          v-if="entry.type === 'object'"
+          :model-value="(entry.value as Record<string, unknown>) || {}"
+          :children="entry.formItem.children || {}"
+          class="w-full"
+          @update:model-value="updateValue(entry.key, $event)"
+        />
+        <!-- Array -->
+        <FormInputArray
+          v-else-if="entry.type === 'array'"
+          :model-value="Array.isArray(entry.value) ? entry.value : []"
+          :form-item="entry.formItem.arrayItemForm || { id: '#array/items', type: 'string', title: 'Items' }"
+          class="w-full"
+          @update:model-value="updateValue(entry.key, $event)"
+        />
+        <!-- Other typed inputs -->
+        <component
+          v-else
+          :is="getComponentForField(entry.type, entry.key)"
+          :model-value="entry.value"
           :form-item="entry.formItem"
+          class="w-full"
           @update:model-value="updateValue(entry.key, $event)"
         />
       </UFormField>

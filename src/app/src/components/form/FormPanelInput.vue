@@ -34,7 +34,32 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   string: InputText,
 }
 
-const inputComponentName = computed(() => typeComponentMap[props.formItem.type] ?? InputText)
+// Check if a field name looks like an image field
+function isImageLikeField(formItem: FormItem): boolean {
+  const combined = [formItem.title, formItem.id, (formItem as { name?: string }).name, (formItem as { path?: string }).path]
+    .filter(Boolean)
+    .map(s => s!.toLowerCase())
+    .join('|')
+
+  const imageTerms = ['image', 'img', 'photo', 'background', 'backgroundimage', 'poster', 'thumb', 'thumbnail', 'logo', 'banner', 'cover', 'avatar', 'picture']
+  return imageTerms.some(term => combined.includes(term))
+}
+
+const inputComponentName = computed(() => {
+  const type = props.formItem.type
+
+  // Don't override array or object types
+  if (type === 'array' || type === 'object') {
+    return typeComponentMap[type] ?? InputText
+  }
+
+  // Check if this looks like an image field
+  if (isImageLikeField(props.formItem)) {
+    return InputMedia
+  }
+
+  return typeComponentMap[type] ?? InputText
+})
 
 const inputFormItem = computed(() => {
   return props.formItem.type === 'array' ? props.formItem.arrayItemForm : props.formItem

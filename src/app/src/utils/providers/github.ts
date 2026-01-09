@@ -10,6 +10,11 @@ interface GitHubUser {
   name: string | null
 }
 
+interface GitHubAppTokenResponse {
+  token: string
+  expiresAt?: string
+}
+
 const NUXT_STUDIO_COAUTHOR = 'Co-authored-by: Nuxt Studio <noreply@nuxt.studio>'
 
 export function createGitHubProvider(options: GitOptions): GitProviderAPI {
@@ -19,6 +24,32 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
   // Support both token formats: "token {token}" for fine grained PATs, "Bearer {token}" for OAuth PATs
   const isPAT = token.startsWith('github_pat_')
   const authHeader = isPAT ? `token ${token}` : `Bearer ${token}`
+
+  // GitHub App token state
+  let appToken: string | null = null
+  let useAppToken = false
+
+  /**
+   * Fetch GitHub App installation token from the server.
+   * If configured, commits will be attributed to the GitHub App bot.
+   */
+  async function fetchAppToken(): Promise<void> {
+    try {
+      const response = await fetch('/api/studio/github-app-token')
+      if (response.ok) {
+        const data: GitHubAppTokenResponse = await response.json()
+        appToken = data.token
+        useAppToken = true
+        console.log('[Studio] Using GitHub App token for commits')
+      }
+      else {
+        console.log('[Studio] GitHub App token not configured, using user OAuth')
+      }
+    }
+    catch (error) {
+      console.log('[Studio] GitHub App token fetch failed, using user OAuth:', (error as Error).message)
+    }
+  }
 
   const $repositoryApi = ofetch.create({
     baseURL: `https://api.github.com/repos/${owner}/${repo}`,
@@ -121,6 +152,9 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
       return Promise.resolve(null)
     }
 
+    // Try to fetch GitHub App token for bot attribution
+    await fetchAppToken()
+
     files = files
       .filter(file => file.status !== DraftStatus.Pristine)
       .map(file => ({ ...file, path: joinURL(rootDir, file.path) }))
@@ -130,9 +164,20 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
     let commitAuthorName = authorName
     let commitAuthorEmail = authorEmail
 
+    // If using GitHub App token, add the user as co-author instead of author
+    // This way the commit is attributed to the bot, with the user credited
+    if (useAppToken && appToken) {
+      // Add the user who made the edit as co-author
+      if (authorName && authorEmail) {
+        coAuthors.push(`Co-authored-by: ${authorName} <${authorEmail}>`)
+      }
+      // Clear author info - GitHub will attribute to the app
+      commitAuthorName = undefined as unknown as string
+      commitAuthorEmail = undefined as unknown as string
+    }
     // For PAT tokens, use the PAT owner's info for the commit author
     // This ensures the commit email is associated with a GitHub account
-    if (isPAT) {
+    else if (isPAT) {
       const patUser = await fetchAuthenticatedUser()
       if (patUser?.email) {
         // Add the original user (who performed the action) as co-author if different from PAT owner
@@ -159,16 +204,29 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
       message: fullMessage,
       authorName: commitAuthorName,
       authorEmail: commitAuthorEmail,
+      useAppToken,
+      appToken,
     })
   }
 
-  async function commitFilesToGitHub({ owner, repo, branch, files, message, authorName, authorEmail }: CommitFilesOptions) {
+  async function commitFilesToGitHub({ owner, repo, branch, files, message, authorName, authorEmail, useAppToken: useApp, appToken: appTok }: CommitFilesOptions & { useAppToken?: boolean, appToken?: string | null }) {
+    // Create API client - use app token if available, otherwise use default
+    const apiClient = (useApp && appTok)
+      ? ofetch.create({
+          baseURL: `https://api.github.com/repos/${owner}/${repo}`,
+          headers: {
+            Authorization: `Bearer ${appTok}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        })
+      : $repositoryApi
+
     // Get latest commit SHA
-    const refData = await $repositoryApi(`/git/refs/heads/${branch}`)
+    const refData = await apiClient(`/git/refs/heads/${branch}`)
     const latestCommitSha = refData.object.sha
 
     // Get base tree SHA
-    const commitData = await $repositoryApi(`/git/commits/${latestCommitSha}`)
+    const commitData = await apiClient(`/git/commits/${latestCommitSha}`)
     const baseTreeSha = commitData.tree.sha
 
     // Create blobs and prepare tree
@@ -185,7 +243,7 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
       }
       else {
         // For new/modified files, create blob and use its sha
-        const blobData = await $repositoryApi(`/git/blobs`, {
+        const blobData = await apiClient(`/git/blobs`, {
           method: 'POST',
           body: JSON.stringify({
             content: file.content,
@@ -202,7 +260,7 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
     }
 
     // Create new tree
-    const treeData = await $repositoryApi(`/git/trees`, {
+    const treeData = await apiClient(`/git/trees`, {
       method: 'POST',
       body: JSON.stringify({
         base_tree: baseTreeSha,
@@ -210,23 +268,29 @@ export function createGitHubProvider(options: GitOptions): GitProviderAPI {
       }),
     })
 
-    // Create new commit
-    const newCommit = await $repositoryApi(`/git/commits`, {
+    // Create new commit - omit author if using app token so GitHub attributes to the app
+    const commitBody: Record<string, unknown> = {
+      message,
+      tree: treeData.sha,
+      parents: [latestCommitSha],
+    }
+
+    // Only include author if not using app token
+    if (!useApp && authorName && authorEmail) {
+      commitBody.author = {
+        name: authorName,
+        email: authorEmail,
+        date: new Date().toISOString(),
+      }
+    }
+
+    const newCommit = await apiClient(`/git/commits`, {
       method: 'POST',
-      body: JSON.stringify({
-        message,
-        tree: treeData.sha,
-        parents: [latestCommitSha],
-        author: {
-          name: authorName,
-          email: authorEmail,
-          date: new Date().toISOString(),
-        },
-      }),
+      body: JSON.stringify(commitBody),
     })
 
     // Update branch ref
-    await $repositoryApi(`/git/refs/heads/${branch}`, {
+    await apiClient(`/git/refs/heads/${branch}`, {
       method: 'PATCH',
       body: JSON.stringify({ sha: newCommit.sha }),
     })

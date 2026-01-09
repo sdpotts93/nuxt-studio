@@ -18,6 +18,7 @@ const itemsLabel = computed(() => titleCase(props.formItem?.title))
 
 const activeIndex = ref<number | null>(null)
 const stringEditingValue = ref('')
+const dragIndex = ref<number | null>(null)
 
 // Computed items for display
 const items = computed(() => {
@@ -47,6 +48,10 @@ function deleteItem(index: number) {
   if (activeIndex.value === index) {
     activeIndex.value = null
   }
+  // Reset drag index if needed
+  if (dragIndex.value !== null && dragIndex.value >= model.value.length) {
+    dragIndex.value = null
+  }
 }
 
 function startStringEditing(index: number, value?: unknown) {
@@ -67,6 +72,58 @@ function saveStringEditing() {
 function updateObjectItem(index: number, value: Record<string, unknown>) {
   model.value = model.value.map((item, i) => i === index ? value : item)
 }
+
+// Drag and drop reordering
+function moveItem(fromIndex: number, toIndex: number) {
+  const arr = [...(model.value || [])]
+  if (!arr.length) return
+
+  const [item] = arr.splice(fromIndex, 1)
+  arr.splice(toIndex, 0, item)
+  model.value = arr
+
+  // Update activeIndex if needed
+  if (activeIndex.value !== null) {
+    if (activeIndex.value === fromIndex) {
+      activeIndex.value = toIndex
+    }
+    else if (activeIndex.value > fromIndex && activeIndex.value <= toIndex) {
+      activeIndex.value = activeIndex.value - 1
+    }
+    else if (activeIndex.value < fromIndex && activeIndex.value >= toIndex) {
+      activeIndex.value = activeIndex.value + 1
+    }
+  }
+  dragIndex.value = toIndex
+}
+
+function getDragHandleProps(index: number) {
+  return {
+    draggable: true,
+    onDragstart: (e: DragEvent) => {
+      e.dataTransfer?.setData('text/plain', '')
+      dragIndex.value = index
+    },
+    onDragend: () => {
+      dragIndex.value = null
+    },
+  }
+}
+
+function getDropZoneProps(index: number) {
+  return {
+    onDragenter: (e: DragEvent) => {
+      e.preventDefault()
+      if (dragIndex.value !== null && dragIndex.value !== index) {
+        moveItem(dragIndex.value, index)
+      }
+    },
+    onDragover: (e: DragEvent) => e.preventDefault(),
+    onDrop: () => {
+      dragIndex.value = null
+    },
+  }
+}
 </script>
 
 <template>
@@ -80,8 +137,19 @@ function updateObjectItem(index: number, value: Record<string, unknown>) {
           :open="activeIndex === item.index"
           :label="item.label"
           class="group/item"
+          v-bind="getDropZoneProps(item.index)"
           @update:open="(open: boolean) => activeIndex = open ? item.index : null"
         >
+          <template #badge>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              size="2xs"
+              icon="i-lucide-grip-vertical"
+              class="cursor-grab text-muted opacity-0 group-hover/item:opacity-100 transition-opacity"
+              v-bind="getDragHandleProps(item.index)"
+            />
+          </template>
           <template #actions>
             <UButton
               variant="ghost"
@@ -106,51 +174,64 @@ function updateObjectItem(index: number, value: Record<string, unknown>) {
     <!-- Array of Strings -->
     <template v-else-if="itemsType === 'string'">
       <div class="flex flex-wrap items-center gap-1.5">
-        <UBadge
+        <div
           v-for="item in items"
           :key="item.label"
-          variant="subtle"
-          color="neutral"
-          size="xs"
-          class="min-w-0"
+          class="flex items-center gap-1"
+          v-bind="getDropZoneProps(item.index)"
         >
-          <UInput
-            v-if="activeIndex === item.index"
-            v-model="stringEditingValue"
+          <UBadge
+            variant="subtle"
+            color="neutral"
             size="xs"
-            variant="none"
-            class="w-24 -my-1"
-            autofocus
-            @keypress.enter="saveStringEditing"
-            @blur="saveStringEditing"
-          />
-          <span
-            v-else
-            class="truncate max-w-32 text-xs"
+            class="min-w-0"
           >
-            {{ item.value }}
-          </span>
+            <UInput
+              v-if="activeIndex === item.index"
+              v-model="stringEditingValue"
+              size="xs"
+              variant="none"
+              class="w-24 -my-1"
+              autofocus
+              @keypress.enter="saveStringEditing"
+              @blur="saveStringEditing"
+            />
+            <span
+              v-else
+              class="truncate max-w-32 text-xs"
+            >
+              {{ item.value }}
+            </span>
 
-          <div class="flex items-center shrink-0">
-            <UButton
-              variant="ghost"
-              color="neutral"
-              size="2xs"
-              :icon="activeIndex === item.index ? 'i-lucide-check' : 'i-lucide-pencil'"
-              :class="{ 'font-medium': activeIndex === item.index }"
-              :aria-label="$t('studio.form.editItem')"
-              @click.stop="activeIndex === item.index ? saveStringEditing : startStringEditing(item.index, item.value)"
-            />
-            <UButton
-              variant="ghost"
-              color="neutral"
-              size="2xs"
-              :icon="activeIndex === item.index ? 'i-lucide-x' : 'i-lucide-trash'"
-              :aria-label="$t('studio.form.deleteItem')"
-              @click.stop="deleteItem(item.index)"
-            />
-          </div>
-        </UBadge>
+            <div class="flex items-center shrink-0">
+              <UButton
+                variant="ghost"
+                color="neutral"
+                size="2xs"
+                icon="i-lucide-grip-vertical"
+                class="cursor-grab"
+                v-bind="getDragHandleProps(item.index)"
+              />
+              <UButton
+                variant="ghost"
+                color="neutral"
+                size="2xs"
+                :icon="activeIndex === item.index ? 'i-lucide-check' : 'i-lucide-pencil'"
+                :class="{ 'font-medium': activeIndex === item.index }"
+                :aria-label="$t('studio.form.editItem')"
+                @click.stop="activeIndex === item.index ? saveStringEditing() : startStringEditing(item.index, item.value)"
+              />
+              <UButton
+                variant="ghost"
+                color="neutral"
+                size="2xs"
+                :icon="activeIndex === item.index ? 'i-lucide-x' : 'i-lucide-trash'"
+                :aria-label="$t('studio.form.deleteItem')"
+                @click.stop="deleteItem(item.index)"
+              />
+            </div>
+          </UBadge>
+        </div>
       </div>
     </template>
 
