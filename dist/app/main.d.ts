@@ -457,13 +457,10 @@ declare module '@tiptap/core' {
 }
 
 
-declare module '@tiptap/core' {
+declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
-        Slot: {
-            /**
-             * Override backspace command
-             */
-            handleSlotBackspace: () => ReturnType;
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
         };
     }
 }
@@ -481,10 +478,25 @@ declare module '@tiptap/core' {
 }
 
 
-declare module '@tiptap/vue-3' {
+declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
+        Slot: {
+            /**
+             * Override backspace command
+             */
+            handleSlotBackspace: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        InlineElement: {
+            /**
+             * Toggle a InlineElement
+             */
+            setInlineElement: (tag: string) => ReturnType;
         };
     }
 }
@@ -525,18 +537,6 @@ declare module '@tiptap/core' {
              * Remove current binding node
              */
             unsetBinding: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
-        InlineElement: {
-            /**
-             * Toggle a InlineElement
-             */
-            setInlineElement: (tag: string) => ReturnType;
         };
     }
 }
