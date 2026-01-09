@@ -214,7 +214,10 @@ async function onSubmit() {
   isLoading.value = true
 
   let params: CreateFileParams | RenameFileParams | CreateFolderParams
-  const newFsPath = slugify(joinURL(props.parentItem.fsPath, fullName.value)).toLowerCase()
+  // Only slugify the filename, not the entire path (slugify removes/replaces slashes)
+  const slugifiedName = slugify(fullName.value).toLowerCase()
+  const parentPath = props.parentItem.fsPath === '/' ? '' : props.parentItem.fsPath
+  const newFsPath = parentPath ? joinURL(parentPath, slugifiedName) : slugifiedName
 
   if (newFsPath === props.renamedItem?.fsPath) {
     isLoading.value = false
