@@ -1,4 +1,5 @@
-import { defineEventHandler, createError, useRuntimeConfig } from 'h3'
+import { defineEventHandler, createError } from 'h3'
+import { useRuntimeConfig } from '#imports'
 
 interface GitHubAppConfig {
   appId?: string

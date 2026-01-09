@@ -1,5 +1,5 @@
-import { defineEventHandler, createError, useRuntimeConfig } from "h3";
-import { useSession } from "h3";
+import { defineEventHandler, createError, useSession } from "h3";
+import { useRuntimeConfig } from "#imports";
 export default defineEventHandler(async (event) => {
   const path = event.path;
   if (!path.startsWith("/_studio") && !path.startsWith("/__nuxt_studio")) {

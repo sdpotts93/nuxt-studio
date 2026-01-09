@@ -439,6 +439,15 @@ export declare enum VideoFileExtension {
 export { }
 
 
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        imagePicker: {
+            insertImagePicker: () => ReturnType;
+        };
+    }
+}
+
+
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         Element: {
@@ -448,10 +457,13 @@ declare module '@tiptap/core' {
 }
 
 
-declare module '@tiptap/vue-3' {
+declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        imagePicker: {
-            insertImagePicker: () => ReturnType;
+        Video: {
+            /**
+             * Add video element
+             */
+            addVideo: () => ReturnType;
         };
     }
 }
@@ -473,18 +485,6 @@ declare module '@tiptap/core' {
              * Override backspace command
              */
             handleSlotBackspace: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
-        Video: {
-            /**
-             * Add video element
-             */
-            addVideo: () => ReturnType;
         };
     }
 }

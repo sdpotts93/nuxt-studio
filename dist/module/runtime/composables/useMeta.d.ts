@@ -1,3 +1,4 @@
+import type { ComponentMeta } from 'nuxt-studio/app';
 export declare const useHostMeta: () => {
     fetch: () => Promise<void>;
     components: import("vue").ShallowRef<ComponentMeta[], ComponentMeta[]>;
