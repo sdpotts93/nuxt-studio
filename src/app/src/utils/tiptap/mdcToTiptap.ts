@@ -35,7 +35,7 @@ const mdcToTiptapMap: MDCToTipTapMap = {
   h6: node => createTipTapNode(node as MDCElement, 'heading', { attrs: { level: 6 } }),
   ul: node => createTipTapNode(node as MDCElement, 'bulletList'),
   ol: node => createTipTapNode(node as MDCElement, 'orderedList', { attrs: { start: (node as MDCElement).props?.start } }),
-  li: node => createTipTapNode(node as MDCElement, 'listItem', { children: [{ type: 'element', tag: 'p', children: (node as MDCElement).children }] }),
+  li: node => createListItemNode(node as MDCElement),
   blockquote: node => createTipTapNode(node as MDCElement, 'blockquote'),
   binding: node => createTipTapNode(node as MDCElement, 'binding', { attrs: { value: (node as MDCElement).props?.value, defaultValue: (node as MDCElement).props?.defaultValue } }),
   hr: node => createTipTapNode(node as MDCElement, 'horizontalRule'),
@@ -274,6 +274,45 @@ function createParagraphNode(node: MDCElement) {
     content,
     attrs: isEmpty(node.props) ? undefined : node.props,
   }
+}
+
+function createListItemNode(node: MDCElement) {
+  // Block-level tags that should NOT be wrapped in a paragraph
+  const blockTags = ['ul', 'ol', 'p', 'blockquote', 'pre', 'hr']
+
+  const children = node.children || []
+
+  // Separate inline children from block children
+  const inlineChildren: MDCNode[] = []
+  const blockChildren: MDCNode[] = []
+
+  for (const child of children) {
+    if (child.type === 'element' && blockTags.includes(child.tag)) {
+      blockChildren.push(child)
+    }
+    else {
+      inlineChildren.push(child)
+    }
+  }
+
+  // Build the listItem content:
+  // 1. Wrap inline children in a paragraph (if any)
+  // 2. Add block children as siblings
+  const listItemChildren: MDCElement[] = []
+
+  if (inlineChildren.length > 0) {
+    listItemChildren.push({
+      type: 'element',
+      tag: 'p',
+      children: inlineChildren,
+      props: {},
+    })
+  }
+
+  // Add block children directly (they'll be converted to their respective TipTap nodes)
+  listItemChildren.push(...blockChildren as MDCElement[])
+
+  return createTipTapNode(node, 'listItem', { children: listItemChildren })
 }
 
 function createTextNode(node: MDCText) {

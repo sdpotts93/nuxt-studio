@@ -457,15 +457,6 @@ declare module '@tiptap/vue-3' {
 }
 
 
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
-        };
-    }
-}
-
-
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         Video: {
@@ -490,21 +481,22 @@ declare module '@tiptap/core' {
 }
 
 
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
+        };
+    }
+}
+
+
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        Binding: {
+        InlineElement: {
             /**
-             * Insert a binding node
+             * Toggle a InlineElement
              */
-            setBinding: (attrs: BindingAttrs) => ReturnType;
-            /**
-             * Update the current binding node attributes
-             */
-            updateBinding: (attrs: BindingAttrs) => ReturnType;
-            /**
-             * Remove current binding node
-             */
-            unsetBinding: () => ReturnType;
+            setInlineElement: (tag: string) => ReturnType;
         };
     }
 }
@@ -532,11 +524,19 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        InlineElement: {
+        Binding: {
             /**
-             * Toggle a InlineElement
+             * Insert a binding node
              */
-            setInlineElement: (tag: string) => ReturnType;
+            setBinding: (attrs: BindingAttrs) => ReturnType;
+            /**
+             * Update the current binding node attributes
+             */
+            updateBinding: (attrs: BindingAttrs) => ReturnType;
+            /**
+             * Remove current binding node
+             */
+            unsetBinding: () => ReturnType;
         };
     }
 }
