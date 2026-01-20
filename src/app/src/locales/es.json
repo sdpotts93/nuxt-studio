@@ -133,6 +133,7 @@
         "duplicateItem": "Duplicar",
         "revertItem": "Revertir cambios",
         "revertAllItems": "Revertir todo",
+        "restoreItem": "Restaurar",
         "publishBranch": "Publicar rama",
         "openGitProvider": "Abrir en {providerName}",
         "switchToTipTap": "Usar editor visual",
@@ -148,6 +149,7 @@
         "duplicateItem": "Duplicar archivo",
         "revertItem": "Revertir cambios",
         "revertAllItems": "Revertir todos los cambios",
+        "restoreItem": "Restaurar archivo eliminado",
         "publishBranch": "Publicar rama"
       }
     },

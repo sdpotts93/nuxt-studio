@@ -32,6 +32,19 @@ const originalPath = computed(() => {
 })
 
 const isCreated = computed(() => props.draftItem.status === DraftStatus.Created)
+const isDeleted = computed(() => props.draftItem.status === DraftStatus.Deleted)
+
+const actionLabel = computed(() => {
+  if (isCreated.value) return 'studio.actions.labels.deleteItem'
+  if (isDeleted.value) return 'studio.actions.labels.restoreItem'
+  return 'studio.actions.labels.revertItem'
+})
+
+const actionIcon = computed(() => {
+  if (isCreated.value) return 'i-lucide-trash-2'
+  if (isDeleted.value) return 'i-lucide-undo-2'
+  return 'i-lucide-undo-2'
+})
 
 function toggleOpen() {
   isOpen.value = !isOpen.value
@@ -44,7 +57,7 @@ function handleRevertOrDelete(event: Event) {
     const action = context.itemActions.value.find(a => a.id === StudioItemActionId.DeleteItem)
     action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
   } else {
-    // For modified/deleted files, revert changes
+    // For modified/deleted files, revert changes (restores deleted files)
     const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertItem)
     action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
   }
@@ -97,11 +110,11 @@ function handleRevertOrDelete(event: Event) {
 
       <div class="flex items-center gap-2">
         <UButton
-          :label="isCreated ? $t('studio.actions.labels.deleteItem') : $t('studio.actions.labels.revertItem')"
+          :label="$t(actionLabel)"
           variant="ghost"
           color="error"
           size="xs"
-          :icon="isCreated ? 'i-lucide-trash-2' : 'i-lucide-undo-2'"
+          :icon="actionIcon"
           @click="handleRevertOrDelete"
         />
         <UIcon
