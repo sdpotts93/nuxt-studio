@@ -96,6 +96,15 @@ export declare interface DatabasePageItem extends PageCollectionItemBase, BaseIt
 declare const _default: {};
 export default _default;
 
+export declare enum DocumentFileExtension {
+    PDF = "pdf",
+    DOC = "doc",
+    DOCX = "docx",
+    XLS = "xls",
+    XLSX = "xlsx",
+    CSV = "csv"
+}
+
 export declare interface DraftItem<T = DatabaseItem | MediaItem> {
     fsPath: string;
     status: DraftStatus;
@@ -439,15 +448,6 @@ export declare enum VideoFileExtension {
 export { }
 
 
-declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
-        Element: {
-            setElement: (tag: string, slot?: string) => ReturnType;
-        };
-    }
-}
-
-
 declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
         imagePicker: {
@@ -471,20 +471,20 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        Slot: {
-            /**
-             * Override backspace command
-             */
-            handleSlotBackspace: () => ReturnType;
+        Element: {
+            setElement: (tag: string, slot?: string) => ReturnType;
         };
     }
 }
 
 
-declare module '@tiptap/vue-3' {
+declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
+        Slot: {
+            /**
+             * Override backspace command
+             */
+            handleSlotBackspace: () => ReturnType;
         };
     }
 }
@@ -537,6 +537,15 @@ declare module '@tiptap/core' {
              * Remove current binding node
              */
             unsetBinding: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
         };
     }
 }
