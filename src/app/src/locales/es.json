@@ -132,6 +132,7 @@
         "uploadMedia": "Subir multimedia",
         "duplicateItem": "Duplicar",
         "revertItem": "Revertir cambios",
+        "revertAllItems": "Revertir todo",
         "publishBranch": "Publicar rama",
         "openGitProvider": "Abrir en {providerName}",
         "switchToTipTap": "Usar editor visual",
@@ -146,6 +147,7 @@
         "uploadMedia": "Subir multimedia",
         "duplicateItem": "Duplicar archivo",
         "revertItem": "Revertir cambios",
+        "revertAllItems": "Revertir todos los cambios",
         "publishBranch": "Publicar rama"
       }
     },

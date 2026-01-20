@@ -2,9 +2,10 @@
 import type { DraftItem } from '../../../types'
 import type { PropType } from 'vue'
 import { computed } from 'vue'
-import { DraftStatus } from '../../../types'
+import { DraftStatus, StudioItemActionId } from '../../../types'
 import { getFileIcon } from '../../../utils/file'
 import { COLOR_UI_STATUS_MAP } from '../../../utils/tree'
+import { useStudio } from '../../../composables/useStudio'
 
 const props = defineProps({
   draftItem: {
@@ -12,6 +13,8 @@ const props = defineProps({
     required: true,
   },
 })
+
+const { context } = useStudio()
 
 const isOpen = defineModel<boolean>({ default: false })
 
@@ -30,6 +33,12 @@ const originalPath = computed(() => {
 
 function toggleOpen() {
   isOpen.value = !isOpen.value
+}
+
+function handleRevert(event: Event) {
+  event.stopPropagation()
+  const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertItem)
+  action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
 }
 </script>
 
@@ -78,6 +87,14 @@ function toggleOpen() {
       </div>
 
       <div class="flex items-center gap-2">
+        <UButton
+          :label="$t('studio.actions.labels.revertItem')"
+          variant="ghost"
+          color="error"
+          size="xs"
+          icon="i-lucide-undo-2"
+          @click="handleRevert"
+        />
         <UIcon
           :name="isOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
           class="w-5 h-5 text-muted transition-transform"

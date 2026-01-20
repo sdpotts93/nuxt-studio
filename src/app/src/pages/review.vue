@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useStudio } from '../composables/useStudio'
-import { DraftStatus } from '../types'
+import { DraftStatus, StudioItemActionId } from '../types'
 import { isMediaFile } from '../utils/file'
 import { COLOR_UI_STATUS_MAP } from '../utils/tree'
 
 const { context } = useStudio()
+
+function handleRevertAll() {
+  const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertAllItems)
+  action?.handler?.(undefined as never)
+}
 
 const groupedDrafts = computed(() => {
   return {
@@ -36,16 +41,27 @@ const statusConfig = {
 
 <template>
   <div class="flex flex-col h-full text-default">
-    <div class="flex items-center gap-1 px-4 py-2 border-b-[0.5px] border-default bg-muted/70">
-      <h2 class="text-xs font-semibold text-muted">
-        {{ $t('studio.review.title') }}
-      </h2>
-      <UBadge
+    <div class="flex items-center justify-between px-4 py-2 border-b-[0.5px] border-default bg-muted/70">
+      <div class="flex items-center gap-1">
+        <h2 class="text-xs font-semibold text-muted">
+          {{ $t('studio.review.title') }}
+        </h2>
+        <UBadge
+          v-if="context.draftCount.value > 0"
+          :label="context.draftCount.value.toString()"
+          color="primary"
+          variant="soft"
+          size="xs"
+        />
+      </div>
+      <UButton
         v-if="context.draftCount.value > 0"
-        :label="context.draftCount.value.toString()"
-        color="primary"
-        variant="soft"
+        :label="$t('studio.actions.labels.revertAllItems')"
+        variant="ghost"
+        color="error"
         size="xs"
+        icon="i-lucide-undo-2"
+        @click="handleRevertAll"
       />
     </div>
 

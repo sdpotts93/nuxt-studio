@@ -42,6 +42,10 @@ function extractImagePath(url) {
     return url.searchParams.get('url') || null
   }
 
+  if (pathname.startsWith('/.netlify/images')) {
+    return url.searchParams.get('url') || null
+  }
+
   if (MEDIA_EXTENSIONS.includes(pathname.split('.').pop())) {
     return pathname
   }
