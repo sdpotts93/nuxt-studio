@@ -186,7 +186,12 @@ function getRouteOptions(items: TreeItem[]): string[] {
   const routes = new Set<string>()
   const walk = (nodes: TreeItem[]) => {
     for (const item of nodes) {
-      if (item.routePath) routes.add(item.routePath)
+      if (item.routePath) {
+        routes.add(item.routePath)
+      }
+      else if (item.pathString) {
+        routes.add(item.pathString)
+      }
       if (item.children?.length) walk(item.children)
     }
   }

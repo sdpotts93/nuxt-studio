@@ -13,6 +13,7 @@ export interface TreeItem {
   prefix: string | null
   status?: TreeStatus
   routePath?: string
+  pathString?: string
   children?: TreeItem[]
   hide?: boolean
 }

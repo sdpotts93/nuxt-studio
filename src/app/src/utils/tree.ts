@@ -86,6 +86,10 @@ TreeItem[] {
         fileItem.routePath = dbItem.path as string
       }
 
+      if ('pathString' in dbItem && dbItem.pathString) {
+        fileItem.pathString = dbItem.pathString as string
+      }
+
       const draftFileItem = draftList?.find(draft => draft.fsPath === dbItem.fsPath)
       if (draftFileItem) {
         fileItem.status = getTreeStatus(draftFileItem)
@@ -150,6 +154,10 @@ TreeItem[] {
 
     if (dbItem.path) {
       fileItem.routePath = dbItem.path as string
+    }
+
+    if ('pathString' in dbItem && dbItem.pathString) {
+      fileItem.pathString = dbItem.pathString as string
     }
 
     directoryChildren.push(fileItem)
