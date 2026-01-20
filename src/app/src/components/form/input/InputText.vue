@@ -155,7 +155,9 @@ function syncLinkTypeFromValue(value: unknown) {
   const text = String(value ?? '').trim()
   if (!text) return
   const detected = detectLinkType(text)
-  if (detected !== linkType.value) {
+  // Only auto-switch to more specific types (section or external)
+  // Don't auto-switch back to 'route' as that would override user's explicit selection
+  if (detected !== 'route' && detected !== linkType.value) {
     linkType.value = detected
   }
 }
