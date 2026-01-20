@@ -51,15 +51,6 @@ declare module '@tiptap/vue-3' {
 }
 
 
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
-        };
-    }
-}
-
-
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         Video: {
@@ -79,6 +70,15 @@ declare module '@tiptap/core' {
              * Override backspace command
              */
             handleSlotBackspace: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
         };
     }
 }
