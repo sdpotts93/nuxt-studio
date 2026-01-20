@@ -23,6 +23,7 @@ import type { useGitProvider } from './useGitProvider'
 import type { useDraftMedias } from './useDraftMedias'
 import { useRoute, useRouter } from 'vue-router'
 import { findDescendantsFileItemsFromFsPath } from '../utils/tree'
+import { isMediaFile } from '../utils/file'
 import { joinURL } from 'ufo'
 import { upperFirst } from 'scule'
 
@@ -153,7 +154,9 @@ export const useContext = createSharedComposable((
       }
     },
     [StudioItemActionId.RevertItem]: async (item: TreeItem) => {
-      await activeTree.value.draft.revert(item.fsPath)
+      // Use the correct tree based on file type (important for review page where activeTree may not match)
+      const tree = isMediaFile(item.fsPath) ? mediaTree : documentTree
+      await tree.draft.revert(item.fsPath)
     },
     [StudioItemActionId.RenameItem]: async (params: TreeItem | RenameFileParams) => {
       const { item, newFsPath } = params as RenameFileParams
