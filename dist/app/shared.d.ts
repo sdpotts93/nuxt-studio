@@ -33,6 +33,15 @@ export declare const VirtualMediaCollectionName: "public-assets";
 export { }
 
 
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        Element: {
+            setElement: (tag: string, slot?: string) => ReturnType;
+        };
+    }
+}
+
+
 declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
         imagePicker: {
@@ -42,22 +51,10 @@ declare module '@tiptap/vue-3' {
 }
 
 
-declare module '@tiptap/core' {
+declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
-        Video: {
-            /**
-             * Add video element
-             */
-            addVideo: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
-        Element: {
-            setElement: (tag: string, slot?: string) => ReturnType;
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
         };
     }
 }
@@ -77,11 +74,11 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        InlineElement: {
+        Video: {
             /**
-             * Toggle a InlineElement
+             * Add video element
              */
-            setInlineElement: (tag: string) => ReturnType;
+            addVideo: () => ReturnType;
         };
     }
 }
@@ -109,6 +106,18 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
+        InlineElement: {
+            /**
+             * Toggle a InlineElement
+             */
+            setInlineElement: (tag: string) => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
         Binding: {
             /**
              * Insert a binding node
@@ -122,15 +131,6 @@ declare module '@tiptap/core' {
              * Remove current binding node
              */
             unsetBinding: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
         };
     }
 }
