@@ -31,14 +31,23 @@ const originalPath = computed(() => {
   return props.draftItem.original.fsPath
 })
 
+const isCreated = computed(() => props.draftItem.status === DraftStatus.Created)
+
 function toggleOpen() {
   isOpen.value = !isOpen.value
 }
 
-function handleRevert(event: Event) {
+function handleRevertOrDelete(event: Event) {
   event.stopPropagation()
-  const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertItem)
-  action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
+  if (isCreated.value) {
+    // For newly created files, delete them
+    const action = context.itemActions.value.find(a => a.id === StudioItemActionId.DeleteItem)
+    action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
+  } else {
+    // For modified/deleted files, revert changes
+    const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertItem)
+    action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
+  }
 }
 </script>
 
@@ -88,12 +97,12 @@ function handleRevert(event: Event) {
 
       <div class="flex items-center gap-2">
         <UButton
-          :label="$t('studio.actions.labels.revertItem')"
+          :label="isCreated ? $t('studio.actions.labels.deleteItem') : $t('studio.actions.labels.revertItem')"
           variant="ghost"
           color="error"
           size="xs"
-          icon="i-lucide-undo-2"
-          @click="handleRevert"
+          :icon="isCreated ? 'i-lucide-trash-2' : 'i-lucide-undo-2'"
+          @click="handleRevertOrDelete"
         />
         <UIcon
           :name="isOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"

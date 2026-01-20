@@ -8,8 +8,7 @@ import { COLOR_UI_STATUS_MAP } from '../utils/tree'
 const { context } = useStudio()
 
 function handleRevertAll() {
-  const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertAllItems)
-  action?.handler?.(undefined as never)
+  context.itemActionHandler[StudioItemActionId.RevertAllItems](undefined as never)
 }
 
 const groupedDrafts = computed(() => {
