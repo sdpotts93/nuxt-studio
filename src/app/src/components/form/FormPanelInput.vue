@@ -9,6 +9,7 @@ import InputBoolean from './input/InputBoolean.vue'
 import InputDate from './input/InputDate.vue'
 import InputIcon from './input/InputIcon.vue'
 import InputMedia from './input/InputMedia.vue'
+import InputFile from './input/InputFile.vue'
 import InputNumber from './input/InputNumber.vue'
 import InputText from './input/InputText.vue'
 import InputColor from './input/InputColor.vue'
@@ -33,6 +34,7 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   datetime: InputDate,
   icon: InputIcon,
   media: InputMedia,
+  file: InputFile,
   color: InputColor,
   link: InputText,
   number: InputNumber,

@@ -1,4 +1,4 @@
-import { ImageFileExtension, VideoFileExtension, AudioFileExtension, ContentFileExtension } from '../types'
+import { ImageFileExtension, VideoFileExtension, AudioFileExtension, ContentFileExtension, DocumentFileExtension } from '../types'
 
 export const IMAGE_EXTENSIONS = [
   ImageFileExtension.PNG,
@@ -28,6 +28,15 @@ export const AUDIO_EXTENSIONS = [
   AudioFileExtension.FLAC,
 ]
 
+export const DOCUMENT_EXTENSIONS = [
+  DocumentFileExtension.PDF,
+  DocumentFileExtension.DOC,
+  DocumentFileExtension.DOCX,
+  DocumentFileExtension.XLS,
+  DocumentFileExtension.XLSX,
+  DocumentFileExtension.CSV,
+]
+
 export const MEDIA_EXTENSIONS = [
   ...IMAGE_EXTENSIONS,
   ...VIDEO_EXTENSIONS,
@@ -46,6 +55,12 @@ export const FILE_ICONS = {
   yaml: 'i-lucide-file-code',
   yml: 'i-lucide-file-code',
   json: 'i-lucide-file-json',
+  pdf: 'i-lucide-file-text',
+  doc: 'i-lucide-file-text',
+  docx: 'i-lucide-file-text',
+  xls: 'i-lucide-file-spreadsheet',
+  xlsx: 'i-lucide-file-spreadsheet',
+  csv: 'i-lucide-file-spreadsheet',
   ...IMAGE_EXTENSIONS.reduce((acc, ext) => ({ ...acc, [ext]: 'i-lucide-file-image' }), {}),
   ...VIDEO_EXTENSIONS.reduce((acc, ext) => ({ ...acc, [ext]: 'i-lucide-file-video' }), {}),
   ...AUDIO_EXTENSIONS.reduce((acc, ext) => ({ ...acc, [ext]: 'i-lucide-file-audio' }), {}),
@@ -83,6 +98,10 @@ export function isAudioFile(fsPath: string) {
 
 export function isImageFile(fsPath: string) {
   return IMAGE_EXTENSIONS.includes(getFileExtension(fsPath) as ImageFileExtension)
+}
+
+export function isDocumentFile(fsPath: string) {
+  return DOCUMENT_EXTENSIONS.includes(getFileExtension(fsPath) as DocumentFileExtension)
 }
 
 export function formatBytes(bytes: number, decimals = 2): string {

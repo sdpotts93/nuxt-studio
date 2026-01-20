@@ -35,6 +35,15 @@ export enum VideoFileExtension {
   WEBM = 'webm',
 }
 
+export enum DocumentFileExtension {
+  PDF = 'pdf',
+  DOC = 'doc',
+  DOCX = 'docx',
+  XLS = 'xls',
+  XLSX = 'xlsx',
+  CSV = 'csv',
+}
+
 export interface ExtensionConfig {
   allowed: string[]
   default?: string
