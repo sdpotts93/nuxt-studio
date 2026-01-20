@@ -52,15 +52,12 @@ function toggleOpen() {
 
 function handleRevertOrDelete(event: Event) {
   event.stopPropagation()
-  if (isCreated.value) {
-    // For newly created files, delete them
-    const action = context.itemActions.value.find(a => a.id === StudioItemActionId.DeleteItem)
-    action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
-  } else {
-    // For modified/deleted files, revert changes (restores deleted files)
-    const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertItem)
-    action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
-  }
+  // RevertItem handles all cases correctly:
+  // - Created: deletes from draft storage
+  // - Updated: reverts to original content
+  // - Deleted: restores the file
+  const action = context.itemActions.value.find(a => a.id === StudioItemActionId.RevertItem)
+  action?.handler?.({ fsPath: props.draftItem.fsPath, type: 'file' } as never)
 }
 </script>
 
