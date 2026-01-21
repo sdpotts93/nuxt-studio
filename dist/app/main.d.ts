@@ -478,18 +478,6 @@ declare module '@tiptap/vue-3' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        Slot: {
-            /**
-             * Override backspace command
-             */
-            handleSlotBackspace: () => ReturnType;
-        };
-    }
-}
-
-
-declare module '@tiptap/core' {
-    interface Commands<ReturnType> {
         Video: {
             /**
              * Add video element
@@ -502,11 +490,11 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        InlineElement: {
+        Slot: {
             /**
-             * Toggle a InlineElement
+             * Override backspace command
              */
-            setInlineElement: (tag: string) => ReturnType;
+            handleSlotBackspace: () => ReturnType;
         };
     }
 }
@@ -527,6 +515,18 @@ declare module '@tiptap/core' {
              * Remove the current span-style node (unwrap content)
              */
             unsetSpanStyle: () => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        InlineElement: {
+            /**
+             * Toggle a InlineElement
+             */
+            setInlineElement: (tag: string) => ReturnType;
         };
     }
 }
