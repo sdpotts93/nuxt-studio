@@ -58,6 +58,10 @@ const inputComponentName = computed(() => {
     return InputText
   }
 
+  if (type === 'file') {
+    return InputFile
+  }
+
   // Check if this looks like an image field
   if (isColorLikeField({ key: props.formItem.key, title: props.formItem.title, id: props.formItem.id })) {
     return InputColor
