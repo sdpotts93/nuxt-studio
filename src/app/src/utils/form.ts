@@ -55,6 +55,11 @@ export const buildFormTreeFromSchema = (treeKey: string, schema: Draft07): FormT
           item!.toggleable = true
         }
 
+        // Apply editor input type from outer definition if present
+        if (editor?.input) {
+          item!.type = editor.input
+        }
+
         return item
       }
 

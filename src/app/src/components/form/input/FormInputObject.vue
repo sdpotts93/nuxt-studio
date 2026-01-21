@@ -9,6 +9,7 @@ import InputBoolean from './InputBoolean.vue'
 import InputDate from './InputDate.vue'
 import InputIcon from './InputIcon.vue'
 import InputMedia from './InputMedia.vue'
+import InputFile from './InputFile.vue'
 import InputColor from './InputColor.vue'
 import { isImageLikeField } from '../../../utils/formMediaHeuristics'
 import { isColorLikeField } from '../../../utils/formColorHeuristics'
@@ -33,6 +34,7 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   datetime: InputDate,
   icon: InputIcon,
   media: InputMedia,
+  file: InputFile,
   color: InputColor,
   link: InputText,
   number: InputNumber,
@@ -50,6 +52,10 @@ function getComponentForField(type: FormInputsTypes | undefined, key: string): C
 
   if (type === 'link') {
     return InputText
+  }
+
+  if (type === 'file') {
+    return InputFile
   }
 
   // If it's a string type but looks like a color field, use color picker
