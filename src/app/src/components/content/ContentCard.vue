@@ -8,7 +8,7 @@ import { useStudio } from '../../composables/useStudio'
 import { StudioItemActionId } from '../../types'
 import ContentCardForm from './ContentCardForm.vue'
 
-const { context } = useStudio()
+const { context, host } = useStudio()
 
 const props = defineProps({
   item: {
@@ -22,6 +22,13 @@ const props = defineProps({
 })
 
 const itemExtensionIcon = computed(() => getFileIcon(props.item.fsPath))
+const isDataDocumentFile = computed(() => {
+  if (props.item.type !== 'file') {
+    return false
+  }
+
+  return host.collection.getByFsPath(props.item.fsPath)?.type === 'data'
+})
 
 // Get the parent folder of the item being renamed (not currentItem which might be the file itself)
 const parentItem = computed(() => {
@@ -57,6 +64,7 @@ const parentItem = computed(() => {
   <ItemCard
     v-else
     :item="item"
+    :is-data-file="isDataDocumentFile"
   >
     <template #thumbnail>
       <div class="w-full h-full flex items-center justify-center">

@@ -154,7 +154,8 @@
       }
     },
     "items": {
-      "itemCount": "1 item | {count} items"
+      "itemCount": "1 item | {count} items",
+      "globalSettings": "Global settings"
     },
     "monaco": {
       "headings": {

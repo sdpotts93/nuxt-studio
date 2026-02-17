@@ -13,6 +13,10 @@ const props = defineProps({
     type: Object as PropType<TreeItem>,
     required: true,
   },
+  isDataFile: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const name = computed(() => titleCase(props.item.name))
@@ -21,12 +25,22 @@ const isDirectory = computed(() => props.item.type === 'directory')
 
 // ring-(--ui-success)/25 ring-(--ui-info)/25 ring-(--ui-warning)/25 ring-(--ui-error)/25 ring-(--ui-neutral)/25
 const statusRingColor = computed(() => props.item.status && props.item.status !== TreeStatus.Opened ? `ring-(--ui-${COLOR_UI_STATUS_MAP[props.item.status]})/25` : '')
+const cardBackgroundColor = computed(() => props.isDataFile ? 'bg-info/10 hover:bg-info/15' : 'hover:bg-muted')
+const globalSettingsLabel = computed(() => {
+  const label = t('studio.items.globalSettings')
+  return label === 'studio.items.globalSettings' ? 'Global settings' : label
+})
 
-const displayInfo = computed(() => {
+const displayInfo = computed<string | null>(() => {
   if (isDirectory.value) {
     const itemcount = props.item.children?.filter(child => !child.hide).length || 0
     return t('studio.items.itemCount', itemcount)
   }
+
+  if (props.isDataFile) {
+    return globalSettingsLabel.value
+  }
+
   return props.item.routePath || props.item.fsPath
 })
 </script>
@@ -35,8 +49,8 @@ const displayInfo = computed(() => {
   <UPageCard
     reverse
     variant="subtle"
-    class="cursor-pointer hover:bg-muted relative w-full min-w-0 overflow-hidden"
-    :class="statusRingColor"
+    class="cursor-pointer relative w-full min-w-0 overflow-hidden"
+    :class="[statusRingColor, cardBackgroundColor]"
     :ui="{ container: 'overflow-hidden' }"
   >
     <template #body>
@@ -67,7 +81,10 @@ const displayInfo = computed(() => {
               </h3>
             </div>
 
-            <div class="truncate leading-relaxed text-xs text-dimmed">
+            <div
+              v-if="displayInfo"
+              class="truncate leading-relaxed text-xs text-dimmed"
+            >
               {{ displayInfo }}
             </div>
           </div>
