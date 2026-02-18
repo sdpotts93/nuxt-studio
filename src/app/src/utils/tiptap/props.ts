@@ -366,7 +366,10 @@ const buildPropItem = (componentId: string, prop: PropertyMeta, nodeProps: Recor
     }
   }
   if (type === 'object' && !propItem.children && value && typeof value === 'object' && !Array.isArray(value)) {
-    propItem.children = buildObjectChildrenFromValue(value, propItem.id)
+    const children = buildObjectChildrenFromValue(value, propItem.id)
+    if (Object.keys(children).length > 0) {
+      propItem.children = children
+    }
   }
   if (options.length) {
     propItem.options = options
@@ -392,7 +395,7 @@ function parseJsonValue(value: unknown): unknown {
   return value
 }
 
-function inferComplexType(value: unknown): JSType | null {
+function inferComplexType(value: unknown): 'array' | 'object' | null {
   if (Array.isArray(value)) return 'array'
   if (value && typeof value === 'object') return 'object'
   return null

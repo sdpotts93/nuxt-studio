@@ -61,11 +61,6 @@ const selectedFileIcon = computed(() => {
   if (!model.value) return 'i-lucide-file'
   return getFileIcon(model.value)
 })
-
-const selectedFileName = computed(() => {
-  if (!model.value) return ''
-  return model.value.split('/').pop() || model.value
-})
 </script>
 
 <template>

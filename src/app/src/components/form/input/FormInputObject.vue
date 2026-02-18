@@ -43,7 +43,6 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   object: undefined, // Will use FormInputObject recursively
 }
 
-
 // Get the appropriate component for a field
 function getComponentForField(type: FormInputsTypes | undefined, key: string): Component {
   if (type === 'color') {
@@ -131,8 +130,8 @@ function updateValue(key: string, value: unknown) {
         />
         <!-- Other typed inputs -->
         <component
-          v-else
           :is="getComponentForField(entry.type, entry.key)"
+          v-else
           :model-value="entry.value"
           :form-item="entry.formItem"
           class="w-full"

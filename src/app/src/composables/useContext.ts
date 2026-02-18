@@ -154,7 +154,33 @@ export const useContext = createSharedComposable((
       }
     },
     [StudioItemActionId.RevertItem]: async (item: TreeItem) => {
-      // Use the correct tree based on file type (important for review page where activeTree may not match)
+      const hasMatchingDraft = (tree: ReturnType<typeof useTree>) => {
+        return tree.draft.list.value.some(draftItem =>
+          draftItem.fsPath === item.fsPath
+          || (item.type !== 'file' && draftItem.fsPath.startsWith(`${item.fsPath}/`)),
+        )
+      }
+
+      const hasMediaDraft = hasMatchingDraft(mediaTree)
+      const hasDocumentDraft = hasMatchingDraft(documentTree)
+
+      if (hasMediaDraft && hasDocumentDraft) {
+        await mediaTree.draft.revert(item.fsPath)
+        await documentTree.draft.revert(item.fsPath)
+        return
+      }
+
+      if (hasMediaDraft) {
+        await mediaTree.draft.revert(item.fsPath)
+        return
+      }
+
+      if (hasDocumentDraft) {
+        await documentTree.draft.revert(item.fsPath)
+        return
+      }
+
+      // Fallback when draft entries are not loaded yet.
       const tree = isMediaFile(item.fsPath) ? mediaTree : documentTree
       await tree.draft.revert(item.fsPath)
     },

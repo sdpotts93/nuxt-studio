@@ -5,7 +5,7 @@ const model = defineModel<string>({ default: '' })
 
 const swatchValue = computed(() => {
   const value = (model.value || '').trim()
-  if (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value)) {
+  if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(value)) {
     return value
   }
   return '#000000'

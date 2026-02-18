@@ -49,9 +49,9 @@ function getLeafKey(key?: string, id?: string): string {
 }
 
 type MediaFieldOptions = {
-  key?: string,
-  title?: string,
-  id?: string,
+  key?: string
+  title?: string
+  id?: string
 }
 
 export function shouldIgnoreMediaField(options: MediaFieldOptions): boolean {

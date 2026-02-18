@@ -71,8 +71,8 @@ export default defineEventHandler(async (event) => {
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${jwt}`,
-          Accept: 'application/vnd.github.v3+json',
+          'Authorization': `Bearer ${jwt}`,
+          'Accept': 'application/vnd.github.v3+json',
           'User-Agent': 'nuxt-studio',
         },
       },

@@ -41,7 +41,6 @@ const typeComponentMap: Partial<Record<FormInputsTypes, Component>> = {
   string: InputText,
 }
 
-
 const inputComponentName = computed(() => {
   const type = props.formItem.type
 

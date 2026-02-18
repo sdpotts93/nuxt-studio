@@ -122,7 +122,7 @@ const isLinkProp = computed(() => {
 })
 
 function isExternalLink(value: string): boolean {
-  return /^(https?:|mailto:|tel:)/i.test(value)
+  return /^(?:https?:|mailto:|tel:)/i.test(value)
 }
 
 function detectLinkType(value: string): LinkType {

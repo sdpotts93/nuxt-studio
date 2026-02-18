@@ -24,9 +24,9 @@ const dragOverIndex = ref<number | null>(null)
 const maxIdLength = 24
 const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.avif', '.bmp', '.tif', '.tiff']
 
-type ItemMeta =
-  | { type: 'text'; display: string; full: string }
-  | { type: 'image'; src: string }
+type ItemMeta
+  = | { type: 'text', display: string, full: string }
+    | { type: 'image', src: string }
 
 function isImagePath(value: string): boolean {
   const normalized = value.trim().toLowerCase()
@@ -245,7 +245,7 @@ function getDropZoneProps(index: number) {
                   :src="item.id.src"
                   :alt="item.label"
                   class="size-5 rounded border border-muted object-cover bg-muted"
-                />
+                >
                 <span
                   v-else-if="item.id?.type === 'text'"
                   class="text-xs text-muted max-w-36 truncate"

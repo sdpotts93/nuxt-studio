@@ -12,7 +12,7 @@ function getLeafKey(key?: string, id?: string): string {
   return ''
 }
 
-export function isColorLikeField(options: { key?: string; title?: string; id?: string }): boolean {
+export function isColorLikeField(options: { key?: string, title?: string, id?: string }): boolean {
   const leaf = getLeafKey(options.key, options.id).toLowerCase()
   const title = (options.title || '').toLowerCase()
   const combined = [leaf, title].filter(Boolean).join('|')
