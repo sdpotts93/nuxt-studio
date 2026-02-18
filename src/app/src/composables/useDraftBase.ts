@@ -60,7 +60,13 @@ export function useDraftBase<T extends DatabaseItem | MediaItem>(
     list.value.push(draftItem)
 
     if (rerender) {
-      await hooks.callHook(hookName, { caller: 'useDraftBase.create' })
+      try {
+        await hooks.callHook(hookName, { caller: 'useDraftBase.create' })
+      }
+      catch (error) {
+        // Keep the write result; tree refresh can fail transiently in dev HTTP storage mode.
+        console.error(`Failed to refresh tree after create (${type}:${fsPath})`, error)
+      }
     }
 
     return draftItem

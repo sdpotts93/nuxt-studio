@@ -6,33 +6,49 @@ import { withLeadingSlash } from 'ufo'
 import { useStorage } from '#imports'
 
 export default eventHandler(async (event) => {
-  const path = event.path.replace('/__nuxt_studio/dev/public/', '')
-  const key = path.replace(/\//g, ':').replace(/^public-assets:/, '')
+  const path = decodeURIComponent(event.path.replace('/__nuxt_studio/dev/public/', '')).replace(/^\/+/, '')
+  const key = normalizeStorageKey(path)
   const storage = useStorage('nuxt_studio_public_assets') as Storage
 
-  // GET => getItem / getKeys
-  if (event.method === 'GET') {
-    const lastChar = key[key.length - 1];
-    const isBaseKey = lastChar === "/" || lastChar === ":";
+  // GET/HEAD => getItem / getKeys / getMeta
+  if (event.method === 'GET' || event.method === 'HEAD') {
+    const isBaseKey = path === ':' || path.endsWith('/:')
     if (isBaseKey) {
-      const keys = await storage.getKeys(key);
-      return keys.map((key) => key.replace(/:/g, "/"));
+      const baseKey = normalizeBaseKey(path)
+      const keys = await storage.getKeys(baseKey)
+      const normalizedKeys = keys
+        .map(storageKey => normalizePathFromStorageKey(storageKey))
+        .filter(Boolean)
+
+      if (event.method === 'HEAD') {
+        return 'OK'
+      }
+
+      return normalizedKeys
     }
 
-    const item = await storage.getMeta(key)
-    if (!item) {
+    const item = await findItemMeta(storage, key)
+    if (!item.meta) {
       throw createError({
         statusCode: 404,
         statusMessage: 'KV value not found',
       })
     }
+
+    setMetaHeaders(event, item.meta)
+
+    if (event.method === 'HEAD') {
+      return 'OK'
+    }
+
+    const normalizedPath = normalizePathFromStorageKey(item.key)
     return {
-      id: `public-assets/${key.replace(/:/g, '/')}`,
-      extension: key.split('.').pop(),
-      stem: key.split('.').join('.'),
-      path: '/' + key.replace(/:/g, '/'),
-      fsPath: withLeadingSlash(key.replace(/:/g, '/')),
-      version: new Date(item.mtime || new Date()).getTime(),
+      id: `public-assets/${normalizedPath}`,
+      extension: normalizedPath.split('.').pop(),
+      stem: normalizedPath.split('.').join('.'),
+      path: withLeadingSlash(normalizedPath),
+      fsPath: withLeadingSlash(normalizedPath),
+      version: new Date(item.meta.mtime || new Date()).getTime(),
     }
   }
 
@@ -58,10 +74,60 @@ export default eventHandler(async (event) => {
 
   // DELETE => removeItem
   if (event.method === 'DELETE') {
-    await storage.removeItem(key)
+    await removeItemVariants(storage, key)
     return 'OK'
   }
 })
+
+function normalizeStorageKey(path: string) {
+  return path
+    .replace(/^public-assets\/?/, '')
+    .replace(/^public-assets:?/, '')
+    .replace(/^\/+/, '')
+}
+
+function normalizeBaseKey(path: string) {
+  return normalizeStorageKey(path)
+    .replace(/\/:$/, '/')
+    .replace(/:$/, '')
+}
+
+function normalizePathFromStorageKey(key: string) {
+  return normalizeStorageKey(key).replace(/:/g, '/')
+}
+
+function getStorageKeyVariants(key: string) {
+  const normalized = normalizeStorageKey(key)
+  return Array.from(new Set([
+    normalized,
+    normalized.replace(/:/g, '/'),
+    normalized.replace(/\//g, ':'),
+  ])).filter(Boolean)
+}
+
+async function findItemMeta(storage: Storage, key: string) {
+  const variants = getStorageKeyVariants(key)
+
+  for (const candidate of variants) {
+    const meta = await storage.getMeta(candidate)
+    if (meta) {
+      return {
+        key: candidate,
+        meta,
+      }
+    }
+  }
+
+  return {
+    key: variants[0] || normalizeStorageKey(key),
+    meta: null as StorageMeta | null,
+  }
+}
+
+async function removeItemVariants(storage: Storage, key: string) {
+  const variants = getStorageKeyVariants(key)
+  await Promise.all(variants.map(variant => storage.removeItem(variant)))
+}
 
 function setMetaHeaders(event: H3Event, meta: StorageMeta) {
   if (meta.mtime) {

@@ -107,7 +107,17 @@
       "fileName": "Nombre del archivo",
       "publicPath": "Ruta pública",
       "providerPath": "Ruta de {providerName}",
-      "markdown": "Markdown"
+      "markdown": "Markdown",
+      "upload": {
+        "loadingTitle": "Subiendo multimedia",
+        "loadingDescription": "Subiendo {count} archivo... | Subiendo {count} archivos...",
+        "successTitle": "Carga completada",
+        "successDescription": "{count} archivo subido correctamente. | {count} archivos subidos correctamente.",
+        "summaryTitle": "Carga finalizada",
+        "summaryDescription": "{success} subidos, {failed} fallidos.",
+        "uploadedSection": "{count} archivo subido | {count} archivos subidos",
+        "failedSection": "{count} archivo fallido | {count} archivos fallidos"
+      }
     },
     "aria": {
       "openActions": "Abrir acciones",

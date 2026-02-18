@@ -107,7 +107,17 @@
       "fileName": "File name",
       "publicPath": "Public path",
       "providerPath": "{providerName} path",
-      "markdown": "Markdown"
+      "markdown": "Markdown",
+      "upload": {
+        "loadingTitle": "Uploading media",
+        "loadingDescription": "Uploading {count} file... | Uploading {count} files...",
+        "successTitle": "Upload complete",
+        "successDescription": "{count} file uploaded successfully. | {count} files uploaded successfully.",
+        "summaryTitle": "Upload finished",
+        "summaryDescription": "{success} uploaded, {failed} failed.",
+        "uploadedSection": "{count} uploaded file | {count} uploaded files",
+        "failedSection": "{count} failed file | {count} failed files"
+      }
     },
     "aria": {
       "openActions": "Open actions",
