@@ -30,6 +30,8 @@ const MEDIA_EXTENSIONS = [
   'm4a',
   'm4v',
   'm4b',
+  'pdf',
+  'txt',
 ]
 
 function extractImagePath(url) {

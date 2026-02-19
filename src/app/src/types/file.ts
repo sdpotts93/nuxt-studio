@@ -5,8 +5,6 @@ export enum ContentFileExtension {
   JSON = 'json',
 }
 
-export type MediaFileExtension = ImageFileExtension | AudioFileExtension | VideoFileExtension
-
 export enum ImageFileExtension {
   PNG = 'png',
   JPG = 'jpg',
@@ -37,12 +35,15 @@ export enum VideoFileExtension {
 
 export enum DocumentFileExtension {
   PDF = 'pdf',
+  TXT = 'txt',
   DOC = 'doc',
   DOCX = 'docx',
   XLS = 'xls',
   XLSX = 'xlsx',
   CSV = 'csv',
 }
+
+export type MediaFileExtension = ImageFileExtension | AudioFileExtension | VideoFileExtension | DocumentFileExtension.PDF | DocumentFileExtension.TXT
 
 export interface ExtensionConfig {
   allowed: string[]

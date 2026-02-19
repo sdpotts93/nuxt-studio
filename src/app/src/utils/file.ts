@@ -1,4 +1,4 @@
-import { ImageFileExtension, VideoFileExtension, AudioFileExtension, ContentFileExtension, DocumentFileExtension } from '../types'
+import { ImageFileExtension, VideoFileExtension, AudioFileExtension, ContentFileExtension, DocumentFileExtension, MediaFileExtension } from '../types'
 
 export const IMAGE_EXTENSIONS = [
   ImageFileExtension.PNG,
@@ -30,6 +30,7 @@ export const AUDIO_EXTENSIONS = [
 
 export const DOCUMENT_EXTENSIONS = [
   DocumentFileExtension.PDF,
+  DocumentFileExtension.TXT,
   DocumentFileExtension.DOC,
   DocumentFileExtension.DOCX,
   DocumentFileExtension.XLS,
@@ -41,6 +42,8 @@ export const MEDIA_EXTENSIONS = [
   ...IMAGE_EXTENSIONS,
   ...VIDEO_EXTENSIONS,
   ...AUDIO_EXTENSIONS,
+  DocumentFileExtension.PDF,
+  DocumentFileExtension.TXT,
 ]
 
 export const CONTENT_EXTENSIONS = [
@@ -56,6 +59,7 @@ export const FILE_ICONS = {
   yml: 'i-lucide-file-code',
   json: 'i-lucide-file-json',
   pdf: 'i-lucide-file-text',
+  txt: 'i-lucide-file-text',
   doc: 'i-lucide-file-text',
   docx: 'i-lucide-file-text',
   xls: 'i-lucide-file-spreadsheet',
@@ -85,7 +89,7 @@ export function getFileIcon(fsPath: string) {
 }
 
 export function isMediaFile(fsPath: string) {
-  return MEDIA_EXTENSIONS.includes(getFileExtension(fsPath) as ImageFileExtension | VideoFileExtension | AudioFileExtension)
+  return MEDIA_EXTENSIONS.includes(getFileExtension(fsPath) as MediaFileExtension)
 }
 
 export function isVideoFile(fsPath: string) {

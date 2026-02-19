@@ -98,6 +98,7 @@ export default _default;
 
 export declare enum DocumentFileExtension {
     PDF = "pdf",
+    TXT = "txt",
     DOC = "doc",
     DOCX = "docx",
     XLS = "xls",
@@ -244,7 +245,7 @@ export declare interface MarkdownParsingOptions {
     collectionType?: CollectionType;
 }
 
-export declare type MediaFileExtension = ImageFileExtension | AudioFileExtension | VideoFileExtension;
+export declare type MediaFileExtension = ImageFileExtension | AudioFileExtension | VideoFileExtension | DocumentFileExtension.PDF | DocumentFileExtension.TXT;
 
 export declare interface MediaItem extends BaseItem {
     [key: string]: unknown;
@@ -449,6 +450,15 @@ export declare enum VideoFileExtension {
 export { }
 
 
+declare module '@tiptap/vue-3' {
+    interface Commands<ReturnType> {
+        imagePicker: {
+            insertImagePicker: () => ReturnType;
+        };
+    }
+}
+
+
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         Element: {
@@ -460,8 +470,8 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
-        imagePicker: {
-            insertImagePicker: () => ReturnType;
+        videoPicker: {
+            insertVideoPicker: () => ReturnType;
         };
     }
 }
@@ -491,22 +501,21 @@ declare module '@tiptap/core' {
 }
 
 
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        videoPicker: {
-            insertVideoPicker: () => ReturnType;
-        };
-    }
-}
-
-
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        InlineElement: {
+        Binding: {
             /**
-             * Toggle a InlineElement
+             * Insert a binding node
              */
-            setInlineElement: (tag: string) => ReturnType;
+            setBinding: (attrs: BindingAttrs) => ReturnType;
+            /**
+             * Update the current binding node attributes
+             */
+            updateBinding: (attrs: BindingAttrs) => ReturnType;
+            /**
+             * Remove current binding node
+             */
+            unsetBinding: () => ReturnType;
         };
     }
 }
@@ -534,19 +543,11 @@ declare module '@tiptap/core' {
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
-        Binding: {
+        InlineElement: {
             /**
-             * Insert a binding node
+             * Toggle a InlineElement
              */
-            setBinding: (attrs: BindingAttrs) => ReturnType;
-            /**
-             * Update the current binding node attributes
-             */
-            updateBinding: (attrs: BindingAttrs) => ReturnType;
-            /**
-             * Remove current binding node
-             */
-            unsetBinding: () => ReturnType;
+            setInlineElement: (tag: string) => ReturnType;
         };
     }
 }
