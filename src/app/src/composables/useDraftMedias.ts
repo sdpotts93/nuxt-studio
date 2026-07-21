@@ -60,18 +60,29 @@ export const useDraftMedias = createSharedComposable((host: StudioHost, gitProvi
       const existingDraftToRename = list.value.find(draftItem => draftItem.fsPath === fsPath) as DraftItem<MediaItem>
 
       const currentDbItem = await host.media.get(fsPath)
-      if (!currentDbItem) {
-        throw new Error(`Database item not found for document fsPath: ${fsPath}`)
+      const modifiedItem = existingDraftToRename?.modified || currentDbItem
+      if (!modifiedItem) {
+        throw new Error(`Database item not found for media fsPath: ${fsPath}`)
+      }
+
+      // Existing media records only contain metadata. Preserve uploaded bytes or
+      // fetch the original file before moving it so the new Git path can be created.
+      let raw = modifiedItem.raw
+      if (typeof raw !== 'string') {
+        const remoteFile = existingDraftToRename?.remoteFile
+          || await gitProvider.api.fetchFile(joinURL('public', fsPath), { cached: true })
+        raw = remoteFile?.content
       }
 
       await remove([fsPath], { rerender: false })
 
       const newDbItem: MediaItem = {
-        ...currentDbItem,
+        ...modifiedItem,
         fsPath: newFsPath,
         id: joinURL(VirtualMediaCollectionName, newFsPath),
         stem: generateStemFromFsPath(newFsPath),
         path: withLeadingSlash(newFsPath),
+        ...(typeof raw === 'string' ? { raw } : {}),
       }
 
       await host.media.upsert(newFsPath, newDbItem)
@@ -108,7 +119,20 @@ export const useDraftMedias = createSharedComposable((host: StudioHost, gitProvi
         continue
       }
 
-      const content = (await draftItem.modified?.raw as string).replace(/^data:\w+\/\w+;base64,/, '')
+      let raw = draftItem.modified?.raw
+
+      // Recover drafts created by older Studio versions when a media folder was
+      // renamed without copying the binary content into the new draft entry.
+      if (typeof raw !== 'string' && draftItem.original?.fsPath) {
+        const remoteFile = await gitProvider.api.fetchFile(joinURL('public', draftItem.original.fsPath), { cached: true })
+        raw = remoteFile?.content
+      }
+
+      if (typeof raw !== 'string') {
+        throw new TypeError(`Cannot publish media "${draftItem.fsPath}": its file content is unavailable. Re-upload the image and try again.`)
+      }
+
+      const content = raw.replace(/^data:[^;]+;base64,/, '')
       files.push({ path: joinURL('public', draftItem.fsPath), content, status: draftItem.status, encoding: 'base64' })
     }
 

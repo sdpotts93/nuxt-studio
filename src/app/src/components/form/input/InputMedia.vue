@@ -62,15 +62,15 @@ function selectMedia(media: TreeItem) {
 <template>
   <div class="flex items-center gap-1">
     <div
-      class="flex items-center justify-center size-6 bg-muted border border-muted rounded shrink-0 overflow-hidden"
+      class="flex items-center justify-center size-14 bg-muted border border-muted rounded shrink-0 overflow-hidden"
     >
       <Image
         v-if="model"
         :src="model"
-        width="24"
-        height="24"
+        width="56"
+        height="56"
         :alt="model"
-        class="size-6 object-cover"
+        class="size-14 object-cover"
       />
       <UIcon
         v-else

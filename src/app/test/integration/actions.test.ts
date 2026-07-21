@@ -3,7 +3,7 @@ import { joinURL } from 'ufo'
 import { DraftStatus, StudioItemActionId, StudioFeature, type StudioHost, type TreeItem, type DatabaseItem } from '../../src/types'
 import { normalizeKey, generateUniqueDocumentFsPath, generateUniqueMediaFsPath } from '../utils'
 import { createMockHost, clearMockHost, fsPathToId } from '../mocks/host'
-import { createMockGit } from '../mocks/git'
+import { createMockGit, createMockGithubFile } from '../mocks/git'
 import { createMockFile, createMockMedia, setupMediaMocks } from '../mocks/media'
 import { createMockStorage } from '../mocks/composables'
 import type { useGitProvider } from '../../src/composables/useGitProvider'
@@ -812,6 +812,47 @@ describe('Media - Action Chains Integration Tests', () => {
     expect(consoleInfoSpy).toHaveBeenCalledTimes(2)
     expect(consoleInfoSpy).toHaveBeenCalledWith('studio:draft:media:updated have been called by', 'useDraftBase.create')
     expect(consoleInfoSpy).toHaveBeenCalledWith('studio:draft:media:updated have been called by', 'useDraftMedias.rename')
+  })
+
+  it('Rename existing media preserves and recovers its content for publishing', async () => {
+    const remoteContent = 'aW1hZ2UtYnl0ZXM='
+    vi.mocked(mockGit.api.fetchFile).mockResolvedValue(createMockGithubFile({
+      path: `public/${mediaFsPath}`,
+      content: remoteContent,
+      encoding: 'base64',
+    }))
+
+    await mockHost.media.upsert(mediaFsPath, createMockMedia(mediaId))
+    await context.activeTree.value.draft.load()
+
+    const newFsPath = generateUniqueMediaFsPath('media-renamed', 'png')
+    await context.itemActionHandler[StudioItemActionId.RenameItem]({
+      item: {
+        type: 'file',
+        fsPath: mediaFsPath,
+      } as TreeItem,
+      newFsPath,
+    })
+
+    const renamedDraft = context.activeTree.value.draft.list.value.find(item => item.fsPath === newFsPath)!
+    expect(renamedDraft.modified).toHaveProperty('raw', remoteContent)
+
+    // Simulate a draft saved by the previous implementation, which omitted raw.
+    delete renamedDraft.modified!.raw
+
+    await expect(context.activeTree.value.draft.listAsRawFiles()).resolves.toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        path: `public/${mediaFsPath}`,
+        content: null,
+        status: DraftStatus.Deleted,
+      }),
+      expect.objectContaining({
+        path: `public/${newFsPath}`,
+        content: remoteContent,
+        status: DraftStatus.Created,
+        encoding: 'base64',
+      }),
+    ]))
   })
 
   it('Select > Delete > Revert', async () => {

@@ -3,15 +3,6 @@ export declare const serviceWorker: () => string;
 export { }
 
 
-declare module '@tiptap/vue-3' {
-    interface Commands<ReturnType> {
-        imagePicker: {
-            insertImagePicker: () => ReturnType;
-        };
-    }
-}
-
-
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         Element: {
@@ -54,21 +45,10 @@ declare module '@tiptap/core' {
 }
 
 
-declare module '@tiptap/core' {
+declare module '@tiptap/vue-3' {
     interface Commands<ReturnType> {
-        Binding: {
-            /**
-             * Insert a binding node
-             */
-            setBinding: (attrs: BindingAttrs) => ReturnType;
-            /**
-             * Update the current binding node attributes
-             */
-            updateBinding: (attrs: BindingAttrs) => ReturnType;
-            /**
-             * Remove current binding node
-             */
-            unsetBinding: () => ReturnType;
+        imagePicker: {
+            insertImagePicker: () => ReturnType;
         };
     }
 }
@@ -101,6 +81,26 @@ declare module '@tiptap/core' {
              * Toggle a InlineElement
              */
             setInlineElement: (tag: string) => ReturnType;
+        };
+    }
+}
+
+
+declare module '@tiptap/core' {
+    interface Commands<ReturnType> {
+        Binding: {
+            /**
+             * Insert a binding node
+             */
+            setBinding: (attrs: BindingAttrs) => ReturnType;
+            /**
+             * Update the current binding node attributes
+             */
+            updateBinding: (attrs: BindingAttrs) => ReturnType;
+            /**
+             * Remove current binding node
+             */
+            unsetBinding: () => ReturnType;
         };
     }
 }

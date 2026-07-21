@@ -90,7 +90,7 @@ export function useDraftBase<T extends DatabaseItem | MediaItem>(
           }
           else {
             // TODO: check if remote file has been updated
-            const remoteFile = await gitProvider.api.fetchFile(joinURL('content', fsPath), { cached: true }) as GitFile
+            const remoteFile = await gitProvider.api.fetchFile(joinURL(remotePathPrefix, fsPath), { cached: true }) as GitFile
 
             deleteDraftItem = {
               fsPath: existingDraftItem.fsPath,
@@ -104,7 +104,7 @@ export function useDraftBase<T extends DatabaseItem | MediaItem>(
         }
         else {
         // TODO: check if gh file has been updated
-          const remoteFile = await gitProvider.api.fetchFile(joinURL('content', fsPath), { cached: true }) as GitFile
+          const remoteFile = await gitProvider.api.fetchFile(joinURL(remotePathPrefix, fsPath), { cached: true }) as GitFile
 
           deleteDraftItem = {
             fsPath,
